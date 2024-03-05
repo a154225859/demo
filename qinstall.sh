@@ -1,33 +1,31 @@
 #!/bin/bash
 
-# 数据盘的设备名称
-data_disk="/dev/vdb"
-data_partition="${data_disk}1"
+# 检查是否为root用户
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root" 1>&2
+   exit 1
+fi
 
-# 创建新分区
-echo -e "n\np\n1\n\n\nt\n83\nw" | sudo fdisk "$data_disk"
-sudo partprobe
+# 创建挂载点
+mkdir -p /quilibrium
 
-# 格式化新分区
-sudo mkfs.ext4 "$data_partition"
+# 检查UUID并保存到变量中
+UUID=$(blkid -o value -s UUID /dev/vdb1)
 
-# 挂载新分区
-sudo mkdir /mnt/new_partition
-sudo mount "$data_partition" /mnt/new_partition
+# 挂载磁盘
+mount /dev/vdb1 /quilibrium
 
-# 复制数据
-sudo rsync -avx /path/to/source/ /mnt/new_partition/
+# 检查/etc/fstab中是否已有相应条目，避免重复添加
+if grep -qs '/quilibrium ' /etc/fstab; then
+   echo "/quilibrium already exists in /etc/fstab"
+else
+   # 更新/etc/fstab以实现自动挂载
+   echo "UUID=$UUID /quilibrium ext4 defaults 0 2" >> /etc/fstab
+   echo "/dev/vdb1 is now set to auto-mount to /quilibrium"
+fi
 
-# 更新 /etc/fstab
-echo "$data_partition    /path/to/mountpoint    ext4    defaults    0    0" | sudo tee -a /etc/fstab
+# 测试fstab配置并重新挂载
+mount -a
 
-# 卸载原数据盘
-sudo umount /path/to/old_partition
-
-# 扩展系统盘
-sudo parted /dev/vda resizepart 1 100%
-
-# 扩展文件系统
-sudo resize2fs /dev/vda1
-
-echo "操作完成。请检查是否有任何错误。"
+# 结束脚本
+echo "Script completed successfully."
