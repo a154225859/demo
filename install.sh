@@ -23,13 +23,12 @@ echo 'export GOPATH=$HOME/go' >> ~/.bashrc
 echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
 
-# 下载 cereumonyclient 仓库
-git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
-
 # 配置网络参数
 echo 'net.core.rmem_max=600000000' | sudo tee -a /etc/sysctl.conf
 echo 'net.core.wmem_max=600000000' | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 
-# 重启系统
-sudo reboot
+# 下载 cereumonyclient 仓库
+git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
+cd ceremonyclient/node
+./poor_mans_cd.sh
