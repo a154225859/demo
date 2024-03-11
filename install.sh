@@ -30,5 +30,3 @@ git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
 echo 'net.core.rmem_max=600000000' | sudo tee -a /etc/sysctl.conf
 echo 'net.core.wmem_max=600000000' | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
-
-
