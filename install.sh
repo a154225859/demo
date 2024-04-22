@@ -28,10 +28,10 @@ rm go1.20.14.linux-amd64.tar.gz
 
 # 配置 Go 环境变量
 echo "Configuring Go environment variables..."
-echo 'export GOROOT=/usr/local/go' >> /root/.bashrc
-echo 'export GOPATH=$HOME/go' >> /root/.bashrc
-echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' >> /root/.bashrc
-source /root/.bashrc
+echo 'export GOROOT=/usr/local/go' >> ~/.bashrc
+echo 'export GOPATH=$HOME/go' >> ~/.bashrc
+echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc
 
 # 配置网络参数
 echo "Configuring network parameters..."
