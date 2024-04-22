@@ -25,11 +25,7 @@ ExecStart=/root/go/bin/node ./..
 WantedBy=multi-user.target
 EOF
 
-# 重新加载 systemd 以读取新的服务文件
-systemctl daemon-reload
-
 # 启用并启动服务
 systemctl enable ceremonyclient.service
-systemctl start ceremonyclient.service
 
 echo "Ceremony Client service has been created and started."
