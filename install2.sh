@@ -28,4 +28,17 @@ EOF
 # 启用并启动服务
 systemctl enable ceremonyclient.service
 
-echo "Ceremony Client service has been created and started."
+# 清理 Go 编译缓存
+echo "Cleaning Go build cache..."
+cd /root/ceremonyclient/node
+GOEXPERIMENT=arenas go clean -v -n -a ./...
+
+# 删除旧的可执行文件
+echo "Removing old executable..."
+rm /root/go/bin/node
+
+# 重新安装
+echo "Reinstalling the node..."
+GOEXPERIMENT=arenas go install ./...
+
+reboot
