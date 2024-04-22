@@ -31,12 +31,14 @@ echo "Configuring Go environment variables..."
 echo 'export GOROOT=/usr/local/go' >> ~/.bashrc
 echo 'export GOPATH=$HOME/go' >> ~/.bashrc
 echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' >> ~/.bashrc
+# 配置 Go 环境变量
 source ~/.bashrc
 
 # 配置网络参数
 echo "Configuring network parameters..."
 echo 'net.core.rmem_max=600000000' >> /etc/sysctl.conf
 echo 'net.core.wmem_max=600000000' >> /etc/sysctl.conf
+# 配置网络参数
 sysctl -p
 
 # 下载并初始化 ceremonyclient 仓库
