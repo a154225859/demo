@@ -52,5 +52,3 @@ cd /root/ceremonyclient/node
 # 设置运行环境变量并运行应用，确保输入正确的 peer-id
 echo "Starting the ceremonyclient node..."
 GOEXPERIMENT=arenas go run ./...
-
-echo "Setup complete. Please reboot or log out and back in for all changes to take effect."
