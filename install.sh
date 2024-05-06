@@ -109,6 +109,7 @@ GOEXPERIMENT=arenas go clean -v -n -a ./...
 rm /root/go/bin/node
 GOEXPERIMENT=arenas go install ./...
 
+echo "启动服务..."
+sudo systemctl start ceremonyclient.service
 
-echo "重启..."
-reboot
+echo "配置完成，请备份私钥..."
