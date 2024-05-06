@@ -101,7 +101,7 @@ ExecStart=/root/go/bin/node ./..
 WantedBy=multi-user.target
 EOF
 
-systemctl enable ceremonyclient.service
+sudo systemctl enable ceremonyclient.service
 
 echo "编译二进制代码..."
 cd /root/ceremonyclient/node
