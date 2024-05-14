@@ -44,7 +44,7 @@ GOEXPERIMENT=arenas go build -o qclient main.go
 echo "peerKey..."
 
 # 执行客户端命令
-./qclient cross-mint 0x7e1b9708c8a4c0ce46a6bc68aec71ad5244f60a6f5090e2b3a91d7c456c2e462cd10f1ba48bc6ffd2eb6a1f8e962aa6666666666
+./qclient cross-mint 0x7e1b9708c8a4c0ce46a6bc68aec71ad5244f60a6f5090e2b3a91d7c456c2e462d384a7ed312ad8a6915e2142834b38bffdfb000c
 
 # 切换到节点目录
 cd /root/ceremonyclient/node
