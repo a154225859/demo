@@ -108,8 +108,7 @@ cd /root/ceremonyclient/node
 GOEXPERIMENT=arenas go clean -v -n -a ./...
 rm /root/go/bin/node
 GOEXPERIMENT=arenas go install ./...
-echo "启动服务..."
-sudo systemctl start ceremonyclient.service
 cd /root/ceremonyclient/node
 GOEXPERIMENT=arenas go run ./... -peer-id
 echo "配置完成，请保存上面的peerid,然后备份私钥..."
+reboot
