@@ -52,7 +52,7 @@ fi
 if grep -q "export GOPATH=/root/.asdf/installs/golang/1.20.14/go" ~/.bashrc; then
     echo "GOPATH already set in ~/.bashrc."
 else
-    echo "export GOPATH=/root/.asdf/installs/golang/1.20.14/go/go" >> ~/.bashrc
+    echo "export GOPATH=/root/.asdf/installs/golang/1.20.14/go" >> ~/.bashrc
     echo "GOPATH set in ~/.bashrc."
 fi
 
