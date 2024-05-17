@@ -129,7 +129,8 @@ sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/0.0.0.0/tcp/8338"|g
 cd /root && go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
 
 echo "下载最新frame进度..."
-cd /root/ceremonyclient/node/.config && git clone https://github.com/a154225859/store.git
+cd /root/ceremonyclient/node/.config && rm -rf /root/ceremonyclient/node/.config/store/
+git clone https://github.com/a154225859/store.git
 
 cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
 rm /root/go/bin/node
