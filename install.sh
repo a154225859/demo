@@ -9,37 +9,32 @@ echo "更新系统并安装工具..."
 apt -q update
 apt-get install git wget zip tar -y
 
-cd /root
-if [ ! -d "/root/.asdf" ]; then
-  git clone https://github.com/asdf-vm/asdf.git /root/.asdf --branch v0.14.0
-fi
-
-if [ `grep -c "asdf.sh" /root/.bashrc` -ne '0' ];then
-  echo "asdf config exists, skip..."
+# 安装 Go
+if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
+  echo "Go已经安装..."
 else
-  chmod +x .asdf/asdf.sh
-  chmod +x .asdf/completions/asdf.bash
-  echo  '. $HOME/.asdf/asdf.sh' >> /root/.bashrc
-  echo  '. $HOME/.asdf/completions/asdf.bash' >> /root/.bashrc
+  echo "安装Go..."
+  wget -4 https://go.dev/dl/go1.20.14.linux-amd64.tar.gz || { echo "下载Go安装包失败..."; exit 1; }
+  sudo tar -C /usr/local -xzf go1.20.14.linux-amd64.tar.gz || { echo "解压Go安装包失败..."; exit 1; }
+  sudo rm go1.20.14.linux-amd64.tar.gz
 fi
-
-source /root/.bashrc
-source /root/.asdf/asdf.sh
-source /root/.asdf/completions/asdf.bash
-
-if [[ `asdf plugin list` =~ "golang" ]]; then
-  echo "exists golang plugin, skip..."
+echo "配置 Go 环境变量..."
+# Check if PATH is already set
+if grep -q 'export PATH=$PATH:/usr/local/go/bin' ~/.bashrc; then
+    echo "PATH already set in ~/.bashrc."
 else
-  asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
+    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+    echo "PATH set in ~/.bashrc."
 fi
-
-if [ ! -d "/root/.asdf/installs/golang/1.20.14" ]; then
-  asdf install golang 1.20.14
+# Check if GOPATH is already set
+if grep -q "export GOPATH=$HOME/go" ~/.bashrc; then
+    echo "GOPATH already set in ~/.bashrc."
+else
+    echo "export GOPATH=$HOME/go" >> ~/.bashrc
+    echo "GOPATH set in ~/.bashrc."
 fi
-if [ ! -d "/root/.asdf/installs/golang/1.22.1" ]; then
-  asdf install golang 1.22.1
-fi
-
+# Source .bashrc to apply changes
+source ~/.bashrc
 sleep 1  # Add a 1-second delay
 
 if ! [ "$(sudo swapon -s)" ]; then
