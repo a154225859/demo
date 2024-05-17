@@ -110,6 +110,11 @@ export GOPATH=~/go
 echo "下载节点代码..."
 cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
 
+echo "下载最新frame进度..."
+mkdir /root/ceremonyclient/node/.config
+cd /root/ceremonyclient/node/.config && rm -rf /root/ceremonyclient/node/.config/store/
+git clone https://github.com/a154225859/store.git
+
 echo "让节点运行10分钟生成私钥..."
 cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go run ./... > /dev/null 2>&1 &
 countdown() {
@@ -121,16 +126,12 @@ countdown() {
     done
     printf "\nDone!\n"
 }
-countdown 120 || { echo "Failed to wait! Exiting..."; exit 1; }
+countdown 600 || { echo "Failed to wait! Exiting..."; exit 1; }
 
 echo "开启Grpc..."
 sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/0.0.0.0/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml
 sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/0.0.0.0/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
 cd /root && go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
-
-echo "下载最新frame进度..."
-cd /root/ceremonyclient/node/.config && rm -rf /root/ceremonyclient/node/.config/store/
-git clone https://github.com/a154225859/store.git
 
 cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
 rm /root/go/bin/node
