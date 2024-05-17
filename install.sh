@@ -66,6 +66,16 @@ journalctl -fu ceremonyclient.service
 EOF
 chmod +x /root/qlog.sh
 
+cat <<EOF > /root/qinfo.sh
+grpcurl -plaintext localhost:8337 quilibrium.node.node.pb.NodeService.GetNodeInfo
+EOF
+chmod +x /root/qinfo.sh
+
+cat <<EOF > /root/qcount.sh
+grpcurl -plaintext -max-msg-sz 50000000 localhost:8337 quilibrium.node.node.pb.NodeService.GetPeerInfo | grep peerId | wc -l
+EOF
+chmod +x /root/qcount.sh
+
 cat <<EOF > /root/qupdate.sh
 echo "Stopping Ceremony Client service..."
 systemctl stop ceremonyclient.service
