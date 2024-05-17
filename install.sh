@@ -5,37 +5,11 @@ if ! [ -x "$(command -v sudo)" ]; then
   exit 1
 fi
 
+cd /root 
+
 echo "更新系统并安装工具..."
 apt -q update
 apt-get install git wget zip tar -y
-
-# 安装 Go
-if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
-  echo "Go已经安装..."
-else
-  echo "安装Go..."
-  wget -4 https://go.dev/dl/go1.20.14.linux-amd64.tar.gz || { echo "下载Go安装包失败..."; exit 1; }
-  sudo tar -C /usr/local -xzf go1.20.14.linux-amd64.tar.gz || { echo "解压Go安装包失败..."; exit 1; }
-  sudo rm go1.20.14.linux-amd64.tar.gz
-fi
-echo "配置 Go 环境变量..."
-# Check if PATH is already set
-if grep -q 'export PATH=$PATH:/usr/local/go/bin' ~/.bashrc; then
-    echo "PATH already set in ~/.bashrc."
-else
-    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-    echo "PATH set in ~/.bashrc."
-fi
-# Check if GOPATH is already set
-if grep -q "export GOPATH=$HOME/go" ~/.bashrc; then
-    echo "GOPATH already set in ~/.bashrc."
-else
-    echo "export GOPATH=$HOME/go" >> ~/.bashrc
-    echo "GOPATH set in ~/.bashrc."
-fi
-# Source .bashrc to apply changes
-source ~/.bashrc
-sleep 1  # Add a 1-second delay
 
 if ! [ "$(sudo swapon -s)" ]; then
   echo "创建swap..."
@@ -66,11 +40,6 @@ cat <<EOF > /root/qinfo.sh
 grpcurl -plaintext localhost:8337 quilibrium.node.node.pb.NodeService.GetNodeInfo
 EOF
 chmod +x /root/qinfo.sh
-
-cat <<EOF > /root/qcount.sh
-grpcurl -plaintext -max-msg-sz 50000000 localhost:8337 quilibrium.node.node.pb.NodeService.GetPeerInfo | grep peerId | wc -l
-EOF
-chmod +x /root/qcount.sh
 
 cat <<EOF > /root/qupdate.sh
 echo "Stopping Ceremony Client service..."
@@ -106,18 +75,49 @@ EOF
 
 sudo systemctl enable ceremonyclient.service
 
-echo "下载节点代码..."
-cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
-cd /root/ceremonyclient && asdf local golang 1.20.14
+# 安装 Go
+if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
+  echo "Go已经安装..."
+else
+  echo "安装Go..."
+  wget -4 https://go.dev/dl/go1.20.14.linux-amd64.tar.gz || { echo "下载Go安装包失败..."; exit 1; }
+  sudo tar -C /usr/local -xzf go1.20.14.linux-amd64.tar.gz || { echo "解压Go安装包失败..."; exit 1; }
+  sudo rm go1.20.14.linux-amd64.tar.gz
+fi
+echo "配置 Go 环境变量..."
+# Check if PATH is already set
+if grep -q 'export PATH=$PATH:/usr/local/go/bin' ~/.bashrc; then
+    echo "PATH already set in ~/.bashrc."
+else
+    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+    echo "PATH set in ~/.bashrc."
+fi
+# Check if GOPATH is already set
+if grep -q "export GOPATH=$HOME/go" ~/.bashrc; then
+    echo "GOPATH already set in ~/.bashrc."
+else
+    echo "export GOPATH=$HOME/go" >> ~/.bashrc
+    echo "GOPATH set in ~/.bashrc."
+fi
+# Source .bashrc to apply changes
+source ~/.bashrc
+sleep 1  # Add a 1-second delay
 
-echo "下载最新frame进度..."
-mkdir /root/ceremonyclient/node/.config && cd /root/ceremonyclient/node/.config
-git clone https://github.com/a154225859/store.git
+# 临时设置 Go 环境变量 - 多余，但它修复了 GO 命令未找到错误
+export PATH=$PATH:/usr/local/go/bin 
+export GOPATH=~/go
 
 echo "安装Grpc..."
-go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
+cd /root && go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
 
-echo "让节点运行5分钟..."
+echo "下载节点代码..."
+cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
+
+echo "下载最新frame进度..."
+mkdir /root/ceremonyclient/node/.config 
+cd /root/ceremonyclient/node/.config && git clone https://github.com/a154225859/store.git
+
+echo "让节点运行2分钟..."
 cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go run ./... > /dev/null 2>&1 &
 countdown() {
     secs=$1
@@ -128,10 +128,10 @@ countdown() {
     done
     printf "\nDone!\n"
 }
-countdown 300 || { echo "Failed to wait! Exiting..."; exit 1; }
+countdown 120 || { echo "Failed to wait! Exiting..."; exit 1; }
 
-sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/127.0.0.1/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml
-sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/127.0.0.1/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
+sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/0.0.0.0/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml
+sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/0.0.0.0/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
 
 cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
 rm /root/go/bin/node
