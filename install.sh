@@ -103,6 +103,9 @@ EOF
 
 sudo systemctl enable ceremonyclient.service
 
+sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/127.0.0.1/tcp/8337"|g' /www/ceremonyclient/node/.config/config.yml
+sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/127.0.0.1/tcp/8338"|g' /www/ceremonyclient/node/.config/config.yml
+
 echo "编译二进制代码..."
 cd /root/ceremonyclient/node
 GOEXPERIMENT=arenas go clean -v -n -a ./...
