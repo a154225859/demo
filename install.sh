@@ -110,10 +110,10 @@ export GOPATH=~/go
 echo "下载节点代码..."
 cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
 
-echo "下载最新frame进度..."
-mkdir /root/ceremonyclient/node/.config
-cd /root/ceremonyclient/node/.config && rm -rf /root/ceremonyclient/node/.config/store/
-git clone https://github.com/a154225859/store.git
+# echo "下载最新frame进度..."
+# mkdir /root/ceremonyclient/node/.config
+# cd /root/ceremonyclient/node/.config && rm -rf /root/ceremonyclient/node/.config/store/
+# git clone https://github.com/a154225859/store.git
 
 echo "让节点运行10分钟生成私钥..."
 cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go run ./... > /dev/null 2>&1 &
