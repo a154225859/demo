@@ -6,39 +6,40 @@ if ! [ -x "$(command -v sudo)" ]; then
 fi
 
 echo "更新系统并安装工具..."
-sudo apt -q update
-sudo apt-get install git wget zip tar -y
+apt -q update
+apt-get install git wget zip tar -y
 
-# 安装 Go
-if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
-  echo "Go已经安装..."
-else
-  echo "安装Go..."
-  wget -4 https://go.dev/dl/go1.20.14.linux-amd64.tar.gz || { echo "下载Go安装包失败..."; exit 1; }
-  sudo tar -C /usr/local -xzf go1.20.14.linux-amd64.tar.gz || { echo "解压Go安装包失败..."; exit 1; }
-  sudo rm go1.20.14.linux-amd64.tar.gz
+cd /root
+if [ ! -d "/root/.asdf" ]; then
+  git clone https://github.com/asdf-vm/asdf.git /root/.asdf --branch v0.14.0
 fi
 
-echo "配置 Go 环境变量..."
-
-# Check if PATH is already set
-if grep -q 'export PATH=$PATH:/usr/local/go/bin' ~/.bashrc; then
-    echo "PATH already set in ~/.bashrc."
+if [ `grep -c "asdf.sh" /root/.bashrc` -ne '0' ];then
+  echo "asdf config exists, skip..."
 else
-    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-    echo "PATH set in ~/.bashrc."
+  chmod +x .asdf/asdf.sh
+  chmod +x .asdf/completions/asdf.bash
+  echo  '. $HOME/.asdf/asdf.sh' >> /root/.bashrc
+  echo  '. $HOME/.asdf/completions/asdf.bash' >> /root/.bashrc
 fi
 
-# Check if GOPATH is already set
-if grep -q "export GOPATH=$HOME/go" ~/.bashrc; then
-    echo "GOPATH already set in ~/.bashrc."
+source /root/.bashrc
+source /root/.asdf/asdf.sh
+source /root/.asdf/completions/asdf.bash
+
+if [[ `asdf plugin list` =~ "golang" ]]; then
+  echo "exists golang plugin, skip..."
 else
-    echo "export GOPATH=$HOME/go" >> ~/.bashrc
-    echo "GOPATH set in ~/.bashrc."
+  asdf plugin add golang https://github.com/asdf-community/asdf-golang.git
 fi
 
-# Source .bashrc to apply changes
-source ~/.bashrc
+if [ ! -d "/root/.asdf/installs/golang/1.20.14" ]; then
+  asdf install golang 1.20.14
+fi
+if [ ! -d "/root/.asdf/installs/golang/1.22.1" ]; then
+  asdf install golang 1.22.1
+fi
+
 sleep 1  # Add a 1-second delay
 
 if ! [ "$(sudo swapon -s)" ]; then
@@ -112,14 +113,11 @@ sudo systemctl enable ceremonyclient.service
 
 echo "下载节点代码..."
 cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
+cd /root/ceremonyclient && asdf local golang 1.20.14
 
 echo "下载最新frame进度..."
 mkdir /root/ceremonyclient/node/.config && cd /root/ceremonyclient/node/.config
 git clone https://github.com/a154225859/store.git
-
-# 临时设置 Go 环境变量 - 多余，但它修复了 GO 命令未找到错误
-export PATH=$PATH:/usr/local/go/bin 
-export GOPATH=~/go
 
 echo "安装Grpc..."
 go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
