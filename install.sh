@@ -7,7 +7,7 @@ fi
 
 echo "更新系统并安装工具..."
 sudo apt -q update
-sudo apt-get install git wget screen tar -y
+sudo apt-get install git wget zip tar -y
 
 # 安装 Go
 if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
@@ -61,28 +61,6 @@ else
 fi
 sudo sysctl -p
 
-echo "下载节点代码..."
-cd /root
-git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
-cd /root/ceremonyclient/node
-
-# 临时设置 Go 环境变量 - 多余，但它修复了 GO 命令未找到错误
-export PATH=$PATH:/usr/local/go/bin 
-export GOPATH=~/go
-
-echo "让节点运行5分钟后停止..."
-GOEXPERIMENT=arenas go run ./... > /dev/null 2>&1 &
-countdown() {
-    secs=$1
-    while [ $secs -gt 0 ]; do
-        printf "\r%02d:%02d remaining" $(($secs/60)) $(($secs%60))
-        sleep 1
-        ((secs--))
-    done
-    printf "\nDone!\n"
-}
-countdown 300 || { echo "Failed to wait! Exiting..."; exit 1; }
-
 echo "将节点设置为系统服务..."
 
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
@@ -103,15 +81,41 @@ EOF
 
 sudo systemctl enable ceremonyclient.service
 
+echo "下载节点代码..."
+cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
+
+echo "下载最新frame进度..."
+mkdir /root/ceremonyclient/node/.config && cd /root/ceremonyclient/node/.config
+git clone https://github.com/a154225859/store.git
+
+# 临时设置 Go 环境变量 - 多余，但它修复了 GO 命令未找到错误
+export PATH=$PATH:/usr/local/go/bin 
+export GOPATH=~/go
+
+echo "安装Grpc..."
+go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
+
+echo "编译二进制代码..."
+cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
+rm /root/go/bin/node
+cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go install ./...
+
+echo "让节点运行5分钟..."
+cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go run ./... > /dev/null 2>&1 &
+countdown() {
+    secs=$1
+    while [ $secs -gt 0 ]; do
+        printf "\r%02d:%02d remaining" $(($secs/60)) $(($secs%60))
+        sleep 1
+        ((secs--))
+    done
+    printf "\nDone!\n"
+}
+countdown 300 || { echo "Failed to wait! Exiting..."; exit 1; }
+
 sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/127.0.0.1/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml
 sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/127.0.0.1/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
 
-echo "编译二进制代码..."
-cd /root/ceremonyclient/node
-GOEXPERIMENT=arenas go clean -v -n -a ./...
-rm /root/go/bin/node
-GOEXPERIMENT=arenas go install ./...
-cd /root/ceremonyclient/node
 GOEXPERIMENT=arenas go run ./... -peer-id
 echo "配置完成，请保存上面的peerid,然后备份私钥..."
 reboot
