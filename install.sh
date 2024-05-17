@@ -61,8 +61,27 @@ else
 fi
 sudo sysctl -p
 
-echo "将节点设置为系统服务..."
+cat <<EOF > /root/qlog.sh
+journalctl -fu ceremonyclient.service
+EOF
+chmod +x /root/qlog.sh
 
+cat <<EOF > /root/qupdate.sh
+echo "Stopping Ceremony Client service..."
+systemctl stop ceremonyclient.service
+cd /root/ceremonyclient
+git fetch origin
+git merge origin
+cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
+rm /root/go/bin/node
+GOEXPERIMENT=arenas go install ./...
+echo "Restarting Ceremony Client service..."
+systemctl start ceremonyclient.service
+echo "Ceremony Client has been updated and restarted successfully."
+EOF
+chmod +x /root/qupdate.sh
+
+echo "将节点设置为系统服务..."
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
 [Unit]
 Description=Ceremony Client Go App Service
