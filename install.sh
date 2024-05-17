@@ -122,11 +122,6 @@ git clone https://github.com/a154225859/store.git
 echo "安装Grpc..."
 go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
 
-echo "编译二进制代码..."
-cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
-rm /root/go/bin/node
-cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go install ./...
-
 echo "让节点运行5分钟..."
 cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go run ./... > /dev/null 2>&1 &
 countdown() {
@@ -142,6 +137,10 @@ countdown 300 || { echo "Failed to wait! Exiting..."; exit 1; }
 
 sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/127.0.0.1/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml
 sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/127.0.0.1/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
+
+cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
+rm /root/go/bin/node
+cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go install ./...
 
 GOEXPERIMENT=arenas go run ./... -peer-id
 echo "配置完成，请保存上面的peerid,然后备份私钥..."
