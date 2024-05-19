@@ -9,7 +9,7 @@ cd /root
 
 echo "更新系统并安装工具..."
 apt -q update
-apt-get install git wget zip tar -y
+apt-get install git wget tar -y
 
 if ! [ "$(sudo swapon -s)" ]; then
   echo "创建swap..."
