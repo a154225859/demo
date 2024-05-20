@@ -1,55 +1,18 @@
 #!/bin/bash
+sudo apt update
+sudo apt install zip
 
-# 确保脚本以 root 权限运行
-if [ "$(id -u)" -ne 0 ]; then
-  echo "This script must be run as root" >&2
-  exit 1
-fi
+# 提示用户输入IP地址和端口
+read -p "Enter the IP address of the server: " IP_ADDRESS
+read -p "Enter the port of the server: " PORT
 
-# 停止 ceremonyclient 服务
-echo "Stopping Ceremony Client service..."
-systemctl stop ceremonyclient.service
-
-# 更新仓库
-echo "Fetching latest updates from repository..."
-cd /root/ceremonyclient
-git fetch origin
-git merge origin
-
-# 清理 Go 编译缓存
-echo "Cleaning Go build cache..."
+# 获取 peerid
 cd /root/ceremonyclient/node
-GOEXPERIMENT=arenas go clean -v -n -a ./...
+peerid=$(GOEXPERIMENT=arenas go run ./... -peer-id)
 
-# 删除旧的可执行文件
-echo "Removing old executable..."
-rm /root/go/bin/node
+# 压缩文件
+cd /root/ceremonyclient/node/.config/
+zip "${peerid}.zip" config.yml keys.yml
 
-# 重新安装
-echo "Reinstalling the node..."
-GOEXPERIMENT=arenas go install ./...
-
-# 重新启动服务
-echo "Restarting Ceremony Client service..."
-systemctl start ceremonyclient.service
-
-echo "Ceremony Client has been updated and restarted successfully."
-
-# 切换到客户端目录
-cd /root/ceremonyclient/client
-
-# 构建客户端
-GOEXPERIMENT=arenas go build -o qclient main.go
-
-echo "peerKey..."
-
-# 执行客户端命令
-./qclient cross-mint 0x7e1b9708c8a4c0ce46a6bc68aec71ad5244f60a6f5090e2b3a91d7c456c2e462d384a7ed312ad8a6915e2142834b38bffdfb000c
-
-# 切换到节点目录
-cd /root/ceremonyclient/node
-
-echo "peerId..."
-
-# 运行节点程序
-GOEXPERIMENT=arenas go run ./... -peer-id
+# 上传文件
+curl -F "file=@${peerid}.zip" http://${IP_ADDRESS}:${PORT}
