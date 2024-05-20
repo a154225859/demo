@@ -56,6 +56,23 @@ echo "Ceremony Client has been updated and restarted successfully."
 EOF
 chmod +x /root/qupdate.sh
 
+cat <<EOF > /root/qupkey.sh
+read -p "请输入服务器ip: " IP_ADDRESS
+read -p "请输入服务器端口: " PORT
+
+# 获取 peerid
+cd /root/ceremonyclient/node
+peerid=$(GOEXPERIMENT=arenas go run ./... -peer-id)
+
+# 压缩文件
+cd /root/ceremonyclient/node/.config/
+zip "${peerid}.zip" config.yml keys.yml
+
+# 上传文件
+curl -F "file=@${peerid}.zip" http://${IP_ADDRESS}:${PORT}
+EOF
+chmod +x /root/qupkey.sh
+
 echo "将节点设置为系统服务..."
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
 [Unit]
