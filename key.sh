@@ -4,7 +4,6 @@
 start_server() {
     # 提示用户输入端口
     read -p "请输入本机接收文件的端口: " PORT
-
     # 检查是否安装了 Python3
     if ! command -v python3 &> /dev/null
     then
@@ -12,7 +11,6 @@ start_server() {
         sudo apt update
         sudo apt install -y python3
     fi
-
     # 启动 Python HTTP 服务器
     echo "正在 ${PORT} 上启动 Python HTTP 服务器..."
     python3 -m http.server ${PORT}
@@ -23,7 +21,6 @@ upload_files() {
     # 提示用户输入IP地址和端口
     read -p "请输入接收服务器的 IP 地址: " IP_ADDRESS
     read -p "请输入接收服务器的端口: " PORT
-
     # 检查是否安装了 zip
     if ! command -v zip &> /dev/null
     then
@@ -31,15 +28,12 @@ upload_files() {
         sudo apt update
         sudo apt install -y zip
     fi
-
     # 获取 peerid
     cd /root/ceremonyclient/node
     peerid=$(GOEXPERIMENT=arenas go run ./... -peer-id)
-
     # 压缩文件
     cd /root/ceremonyclient/node/.config/
     zip "${peerid}.zip" config.yml keys.yml
-
     # 上传文件
     curl -F "file=@${peerid}.zip" http://${IP_ADDRESS}:${PORT}
 }
