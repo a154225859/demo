@@ -48,7 +48,7 @@ wget http://49.13.194.189:8008/store.tar -O store.tar && tar -xvf store.tar
 rm /root/ceremonyclient/node/.config/store.tar
 systemctl start ceremonyclient.service && journalctl -fu ceremonyclient.service
 EOF
-chmod +x /root/qstore.sh && ./qstore.sh
+chmod +x /root/qstore.sh
 
 cat <<EOF > /root/qupdate.sh
 echo "Stopping Ceremony Client service..."
