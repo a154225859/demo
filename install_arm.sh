@@ -75,6 +75,29 @@ EOF
 
 sudo systemctl enable ceremonyclient.service
 
+# 获取系统架构
+ARCH=$(uname -m)
+
+# 根据系统架构设置下载链接
+if [[ "$ARCH" == "aarch64" ]]; then
+  GO_TAR="go1.20.14.linux-arm64.tar.gz"
+elif [[ "$ARCH" == "x86_64" ]]; then
+  GO_TAR="go1.20.14.linux-amd64.tar.gz"
+else
+  echo "不支持的系统架构: $ARCH"
+  exit 1
+fi
+
+# 检查 Go 是否已安装以及版本是否在 1.20.1 到 1.20.14 之间
+if go version | grep -qE "go1\.20\.(1[0-4]|[0-9])$"; then
+  echo "Go已经安装..."
+else
+  echo "安装Go..."
+  wget -4 "http://49.13.194.189:8008/$GO_TAR" || { echo "下载Go安装包失败..."; exit 1; }
+  sudo tar -C /usr/local -xzf "$GO_TAR" || { echo "解压Go安装包失败..."; exit 1; }
+  sudo rm "$GO_TAR"
+fi
+
 # 安装 Go
 if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
   echo "Go已经安装..."
