@@ -84,19 +84,6 @@ EOF
 
 sudo systemctl enable ceremonyclient.service
 
-# 获取系统架构
-ARCH=$(uname -m)
-
-# 根据系统架构设置下载链接
-if [[ "$ARCH" == "aarch64" ]]; then
-  GO_TAR="go1.20.14.linux-arm64.tar.gz"
-elif [[ "$ARCH" == "x86_64" ]]; then
-  GO_TAR="go1.20.14.linux-amd64.tar.gz"
-else
-  echo "不支持的系统架构: $ARCH"
-  exit 1
-fi
-
 # 安装 Go
 if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
   echo "Go已经安装..."
