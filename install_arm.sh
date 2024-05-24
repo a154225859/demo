@@ -41,6 +41,15 @@ grpcurl -plaintext localhost:8337 quilibrium.node.node.pb.NodeService.GetNodeInf
 EOF
 chmod +x /root/qinfo.sh
 
+cat <<EOF > /root/qstore.sh
+service ceremonyclient stop
+cd /root/ceremonyclient/node/.config && rm -rf store/
+wget http://49.13.194.189:8008/store.tar -O store.tar && tar -xvf store.tar
+rm /root/ceremonyclient/node/.config/store.tar
+systemctl start ceremonyclient.service && journalctl -fu ceremonyclient.service
+EOF
+chmod +x /root/qstore.sh && ./qstore.sh
+
 cat <<EOF > /root/qupdate.sh
 echo "Stopping Ceremony Client service..."
 systemctl stop ceremonyclient.service
@@ -88,14 +97,14 @@ else
   exit 1
 fi
 
-# 检查 Go 是否已安装以及版本是否在 1.20.1 到 1.20.14 之间
-if go version | grep -qE "go1\.20\.(1[0-4]|[0-9])$"; then
+# 安装 Go
+if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
   echo "Go已经安装..."
 else
   echo "安装Go..."
-  wget -4 "http://49.13.194.189:8008/$GO_TAR" || { echo "下载Go安装包失败..."; exit 1; }
-  sudo tar -C /usr/local -xzf "$GO_TAR" || { echo "解压Go安装包失败..."; exit 1; }
-  sudo rm "$GO_TAR"
+  wget -4 http://49.13.194.189:8008/go1.20.14.linux-arm64.tar.gz || { echo "下载Go安装包失败..."; exit 1; }
+  sudo tar -C /usr/local -xzf go1.20.14.linux-arm64.tar.gz || { echo "解压Go安装包失败..."; exit 1; }
+  sudo rm go1.20.14.linux-arm64.tar.gz
 fi
 
 echo "配置 Go 环境变量..."
