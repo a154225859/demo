@@ -98,15 +98,6 @@ else
   sudo rm "$GO_TAR"
 fi
 
-# 安装 Go
-if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
-  echo "Go已经安装..."
-else
-  echo "安装Go..."
-  wget -4 https://go.dev/dl/go1.20.14.linux-arm64.tar.gz || { echo "下载Go安装包失败..."; exit 1; }
-  sudo tar -C /usr/local -xzf go1.20.14.linux-arm64.tar.gz || { echo "解压Go安装包失败..."; exit 1; }
-  sudo rm go1.20.14.linux-arm64.tar.gz
-fi
 echo "配置 Go 环境变量..."
 # Check if PATH is already set
 if grep -q 'export PATH=$PATH:/usr/local/go/bin' ~/.bashrc; then
