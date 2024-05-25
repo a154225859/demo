@@ -3,6 +3,8 @@
 echo "Stop the existing ceremonyclient service"
 systemctl stop ceremonyclient.service
 
+sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/0.0.0.0/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml && sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/0.0.0.0/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
+
 # Navigate to the ceremonyclient directory and update the repository
 cd /root/ceremonyclient && git fetch origin && git checkout release
 
