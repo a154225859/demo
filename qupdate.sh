@@ -14,10 +14,10 @@ version=$(cat /root/ceremonyclient/node/config/version.go | grep -A 1 "func GetV
 # Determine binary path based on OS type and architecture
 case "$OSTYPE" in
     linux-gnu*)
-        if [[ $(uname -m) == arm* ]]; then
-            binary="node-$version-linux-arm64"
-        else
+        if [[ $(uname -m) == x86* ]]; then
             binary="node-$version-linux-amd64"
+        else
+            binary="node-$version-linux-arm64"
         fi
         ;;
     darwin*)
