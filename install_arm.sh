@@ -36,14 +36,44 @@ journalctl -fu ceremonyclient.service
 EOF
 chmod +x /root/qlog.sh
 
-# 安装 Go
-if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
+# 检查当前安装的 Go 版本
+if go version | grep -q "go1.20.1[1-4]"; then
   echo "Go已经安装..."
 else
   echo "安装Go..."
-  wget -4 http://49.13.194.189:8008/go1.20.14.linux-arm64.tar.gz || { echo "下载Go安装包失败..."; exit 1; }
-  sudo tar -C /usr/local -xzf go1.20.14.linux-arm64.tar.gz || { echo "解压Go安装包失败..."; exit 1; }
-  sudo rm go1.20.14.linux-arm64.tar.gz
+  
+  # 检查系统架构
+  ARCH=$(uname -m)
+  if [[ "$ARCH" == "x86_64" ]]; then
+    GO_URL="http://49.13.194.189:8008/go1.20.14.linux-amd64.tar.gz"
+  elif [[ "$ARCH" == "aarch64" ]]; then
+    GO_URL="http://49.13.194.189:8008/go1.20.14.linux-arm64.tar.gz"
+  else
+    echo "不支持的架构: $ARCH"
+    exit 1
+  fi
+
+  # 下载 Go 安装包
+  if wget -4 $GO_URL; then
+    echo "下载Go安装包成功..."
+  else
+    echo "下载Go安装包失败..."
+    exit 1
+  fi
+  
+  # 提取包文件名
+  FILE_NAME=$(basename $GO_URL)
+  
+  # 解压 Go 安装包
+  if sudo tar -C /usr/local -xzf $FILE_NAME; then
+    echo "解压Go安装包成功..."
+  else
+    echo "解压Go安装包失败..."
+    exit 1
+  fi
+
+  # 删除 Go 安装包
+  sudo rm $FILE_NAME
 fi
 
 echo "配置 Go 环境变量..."
