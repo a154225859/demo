@@ -9,7 +9,7 @@ cd /root
 
 echo "更新系统并安装工具..."
 apt -q update
-apt-get install git wget tar -y
+apt-get install git wget tar curl zip -y
 
 if ! [ "$(sudo swapon -s)" ]; then
   echo "创建swap..."
@@ -35,54 +35,6 @@ cat <<EOF > /root/qlog.sh
 journalctl -fu ceremonyclient.service
 EOF
 chmod +x /root/qlog.sh
-
-cat <<EOF > /root/qinfo.sh
-grpcurl -plaintext localhost:8337 quilibrium.node.node.pb.NodeService.GetNodeInfo
-EOF
-chmod +x /root/qinfo.sh
-
-cat <<EOF > /root/qstore.sh
-service ceremonyclient stop
-cd /root/ceremonyclient/node/.config && rm -rf store/
-wget http://49.13.194.189:8008/store.tar -O store.tar && tar -xvf store.tar
-rm /root/ceremonyclient/node/.config/store.tar
-systemctl start ceremonyclient.service && journalctl -fu ceremonyclient.service
-EOF
-chmod +x /root/qstore.sh
-
-cat <<EOF > /root/qupdate.sh
-echo "Stopping Ceremony Client service..."
-systemctl stop ceremonyclient.service
-cd /root/ceremonyclient
-git fetch origin
-git merge origin
-cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
-rm /root/go/bin/node
-GOEXPERIMENT=arenas go install ./...
-echo "Restarting Ceremony Client service..."
-systemctl start ceremonyclient.service
-echo "Ceremony Client has been updated and restarted successfully."
-EOF
-chmod +x /root/qupdate.sh
-
-echo "将节点设置为系统服务..."
-cat <<EOF > /lib/systemd/system/ceremonyclient.service
-[Unit]
-Description=Ceremony Client Go App Service
-
-[Service]
-Type=simple
-Restart=always
-RestartSec=5s
-WorkingDirectory=/root/ceremonyclient/node
-Environment=GOEXPERIMENT=arenas
-ExecStart=/root/go/bin/node ./..
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl enable ceremonyclient.service
 
 # 安装 Go
 if [[ $(go version) == *"go1.20.1"[1-4]* ]]; then
@@ -119,8 +71,47 @@ export GOPATH=~/go
 
 echo "下载节点代码..."
 cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
-cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go clean -v -n -a ./...
-rm /root/go/bin/node
-cd /root/ceremonyclient/node && GOEXPERIMENT=arenas go install ./...
-systemctl start ceremonyclient.service && journalctl -fu ceremonyclient.service
-echo "完成....."
+
+# Navigate to the ceremonyclient directory and update the repository
+cd /root/ceremonyclient && git fetch origin && git checkout release
+
+# Extract version from Go file
+version=$(cat /root/ceremonyclient/node/config/version.go | grep -A 1 "func GetVersion() \[\]byte {" | grep -Eo '0x[0-9a-fA-F]+' | xargs printf "%d.%d.%d")
+
+# Determine binary path based on OS type and architecture
+case "$OSTYPE" in
+    linux-gnu*)
+        if [[ $(uname -m) == x86* ]]; then
+            binary="node-$version-linux-amd64"
+        else
+            binary="node-$version-linux-arm64"
+        fi
+        ;;
+    darwin*)
+        binary="node-$version-darwin-arm64"
+        ;;
+    *)
+        echo "unsupported OS for releases, please build from source"
+        exit 1
+        ;;
+esac
+
+echo "Create/update the systemd service file for ceremonyclient"
+cat <<EOF > /lib/systemd/system/ceremonyclient.service
+[Unit]
+Description=Ceremony Client Go App Service
+
+[Service]
+CPUQuota=600%
+Type=simple
+Restart=always
+RestartSec=5s
+WorkingDirectory=/root/ceremonyclient/node
+Environment=GOEXPERIMENT=arenas
+ExecStart=/root/ceremonyclient/node/$binary
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl enable ceremonyclient.service
+reboot
