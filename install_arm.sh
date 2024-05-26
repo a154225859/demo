@@ -114,4 +114,5 @@ ExecStart=/root/ceremonyclient/node/$binary
 WantedBy=multi-user.target
 EOF
 sudo systemctl enable ceremonyclient.service
+echo "完成....."
 reboot
