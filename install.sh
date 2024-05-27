@@ -103,7 +103,7 @@ echo "下载节点代码..."
 cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
 
 # Navigate to the ceremonyclient directory and update the repository
-cd /root/ceremonyclient && git fetch origin && git checkout release
+cd /root/ceremonyclient && git fetch origin && git checkout release && git pull
 
 # Extract version from Go file
 version=$(cat /root/ceremonyclient/node/config/version.go | grep -A 1 "func GetVersion() \[\]byte {" | grep -Eo '0x[0-9a-fA-F]+' | xargs printf "%d.%d.%d")
