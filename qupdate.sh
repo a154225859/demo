@@ -29,13 +29,17 @@ case "$OSTYPE" in
         ;;
 esac
 
+# 获取 CPU 核心数量并计算 CPUQuota
+CPU_CORES=$(nproc)
+CPU_QUOTA=$((CPU_CORES * 80))
+
 echo "Create/update the systemd service file for ceremonyclient"
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
 [Unit]
 Description=Ceremony Client Go App Service
 
 [Service]
-CPUQuota=300%
+CPUQuota=${CPU_QUOTA}%
 Type=simple
 Restart=always
 RestartSec=5s
