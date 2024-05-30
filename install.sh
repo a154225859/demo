@@ -100,7 +100,7 @@ export PATH=$PATH:/usr/local/go/bin
 export GOPATH=~/go
 
 echo "下载节点代码..."
-cd /root && git clone https://github.com/QuilibriumNetwork/ceremonyclient.git
+cd /root && git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # Navigate to the ceremonyclient directory and update the repository
 cd /root/ceremonyclient && git fetch origin && git checkout release && git pull
@@ -126,13 +126,17 @@ case "$OSTYPE" in
         ;;
 esac
 
+# 获取 CPU 核心数量并计算 CPUQuota
+CPU_CORES=$(nproc)
+CPU_QUOTA=$((CPU_CORES * 80))
+
 echo "Create/update the systemd service file for ceremonyclient"
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
 [Unit]
 Description=Ceremony Client Go App Service
 
 [Service]
-CPUQuota=600%
+CPUQuota=${CPU_QUOTA}%
 Type=simple
 Restart=always
 RestartSec=5s
