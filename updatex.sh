@@ -6,7 +6,7 @@ systemctl stop ceremonyclient.service
 sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/0.0.0.0/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml && sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/0.0.0.0/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
 
 # Navigate to the ceremonyclient directory and update the repository
-cd /root/ceremonyclient && git fetch origin && git checkout release && git pull
+cd /root/ceremonyclient && git remote set-url origin https://source.quilibrium.com/quilibrium/ceremonyclient.git && git fetch origin && git checkout release && git pull
 
 # Extract version from Go file
 version=$(cat /root/ceremonyclient/node/config/version.go | grep -A 1 "func GetVersion() \[\]byte {" | grep -Eo '0x[0-9a-fA-F]+' | xargs printf "%d.%d.%d")
@@ -35,7 +35,6 @@ cat <<EOF > /lib/systemd/system/ceremonyclient.service
 Description=Ceremony Client Go App Service
 
 [Service]
-CPUQuota=600%
 Type=simple
 Restart=always
 RestartSec=5s
