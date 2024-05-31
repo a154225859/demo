@@ -66,7 +66,7 @@ async def connect_to_wss(user_id):
 
 async def main():
     # TODO 修改user_id
-    _user_id = '"b1452574-f9ef-44ec-b88d-3602b6c47d69"'
+    _user_id = 'b1452574-f9ef-44ec-b88d-3602b6c47d69'
     await connect_to_wss(_user_id)
 
 
