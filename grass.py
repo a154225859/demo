@@ -50,7 +50,7 @@ async def connect_to_wss(user_id):
                                 "user_agent": custom_headers['User-Agent'],
                                 "timestamp": int(time.time()),
                                 "device_type": "extension",
-                                "version": "4.0.2"
+                                "version": "3.3.2"
                             }
                         }
                         logger.debug(auth_response)
