@@ -19,6 +19,7 @@ chmod +x $SCRIPT_PATH
 
 # 安装 Python 依赖包
 echo "Installing required Python packages..."
+apt install python3-pip
 pip3 install websockets loguru
 
 # 创建服务文件内容
