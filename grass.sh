@@ -13,6 +13,10 @@ curl -o $SCRIPT_PATH $SCRIPT_URL
 # 确保文件有执行权限
 chmod +x $SCRIPT_PATH
 
+# 安装 Python 依赖包
+echo "Installing required Python packages..."
+pip3 install websockets loguru
+
 # 创建服务文件内容
 SERVICE_CONTENT="[Unit]
 Description=Grass Python Script Service
@@ -41,10 +45,15 @@ systemctl daemon-reload
 echo "Enabling service $SERVICE_NAME..."
 systemctl enable $SERVICE_NAME
 
+cat <<EOF > /root/glog.sh
+journalctl -fu grass.service
+EOF
+chmod +x /root/glog.sh
+
 # 启动服务
 echo "Starting service $SERVICE_NAME..."
 systemctl start $SERVICE_NAME
 
 # 检查服务状态
 echo "Checking service status..."
-systemctl status $SERVICE_NAME
+journalctl -fu grass.service
