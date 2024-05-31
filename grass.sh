@@ -6,6 +6,10 @@ SERVICE_NAME="grass.service"
 SCRIPT_URL="https://raw.githubusercontent.com/a154225859/demo/main/grass.py"
 SCRIPT_PATH="/root/grass.py"
 
+# 启动服务
+echo "Starting service $SERVICE_NAME..."
+systemctl stop $SERVICE_NAME
+
 # 下载 grass.py 文件
 echo "Downloading grass.py..."
 curl -o $SCRIPT_PATH $SCRIPT_URL
