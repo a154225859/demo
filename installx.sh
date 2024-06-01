@@ -100,7 +100,7 @@ export PATH=$PATH:/usr/local/go/bin
 export GOPATH=~/go
 
 echo "下载节点代码..."
-cd /root && git git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
+cd /root && git clone https://source.quilibrium.com/quilibrium/ceremonyclient.git
 
 # Navigate to the ceremonyclient directory and update the repository
 cd /root/ceremonyclient && git fetch origin && git checkout release && git pull
