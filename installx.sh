@@ -77,21 +77,31 @@ else
 fi
 
 echo "配置 Go 环境变量..."
-# Check if PATH is already set
-if grep -q 'export PATH=$PATH:/usr/local/go/bin' ~/.bashrc; then
-    echo "PATH already set in ~/.bashrc."
+sed -i '/export GOROOT=\/usr\/local\/go/d' ~/.bashrc
+sed -i '/export GOPATH=\/root\/go/d' ~/.bashrc
+sed -i '/export PATH=\$PATH:\/usr\/local\/go\/bin/d' ~/.bashrc
+
+if grep -q 'export GOROOT=/usr/local/go' ~/.bashrc; then
+    echo "GOROOT already set in ~/.bashrc."
 else
-    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-    echo "PATH set in ~/.bashrc."
+    echo 'export GOROOT=/usr/local/go' >> ~/.bashrc
+    echo "GOROOT set in ~/.bashrc."
 fi
-# Check if GOPATH is already set
+
 if grep -q "export GOPATH=$HOME/go" ~/.bashrc; then
     echo "GOPATH already set in ~/.bashrc."
 else
     echo "export GOPATH=$HOME/go" >> ~/.bashrc
     echo "GOPATH set in ~/.bashrc."
 fi
-# Source .bashrc to apply changes
+
+if grep -q 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' ~/.bashrc; then
+    echo "PATH already set in ~/.bashrc."
+else
+    echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' >> ~/.bashrc
+    echo "PATH set in ~/.bashrc."
+fi
+
 source ~/.bashrc
 sleep 1  # Add a 1-second delay
 
