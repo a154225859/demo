@@ -3,9 +3,9 @@
 echo "Stop the existing ceremonyclient service"
 systemctl stop ceremonyclient.service
 
-sed -i 's/^listenMultiaddr:.*$/listenMultiaddr: \/ip4\/0.0.0.0\/tcp\/8336/' /root/ceremonyclient/node/.config/config.yml
-sed -i 's/^listenGrpcMultiaddr:.*$/listenGrpcMultiaddr: \/ip4\/0.0.0.0\/tcp\/8337/' /root/ceremonyclient/node/.config/config.yml
-sed -i 's/^listenRESTMultiaddr:.*$/listenRESTMultiaddr: \/ip4\/0.0.0.0\/tcp\/8338/' /root/ceremonyclient/node/.config/config.yml
+sed -i 's|listenMultiaddr: /ip4/0.0.0.0/udp/8336/quic|listenMultiaddr: /ip4/0.0.0.0/tcp/8336|g' /root/ceremonyclient/node/.config/config.yml
+sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: "/ip4/0.0.0.0/tcp/8337"|g' /root/ceremonyclient/node/.config/config.yml
+sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: "/ip4/0.0.0.0/tcp/8338"|g' /root/ceremonyclient/node/.config/config.yml
 
 sed -i '/export GOROOT=\/usr\/local\/go/d' ~/.bashrc
 sed -i '/export GOPATH=\/root\/go/d' ~/.bashrc
