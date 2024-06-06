@@ -36,8 +36,9 @@ source ~/.bashrc
 
 # 临时设置 Go 环境变量 - 解决一些奇怪的机器提示找不到go的问题
 sleep 1
-export PATH=$PATH:/usr/local/go/bin 
-export GOPATH=~/go
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
 
 go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
 
