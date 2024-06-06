@@ -34,6 +34,11 @@ fi
 
 source ~/.bashrc
 
+# 临时设置 Go 环境变量 - 解决一些奇怪的机器提示找不到go的问题
+sleep 1
+export PATH=$PATH:/usr/local/go/bin 
+export GOPATH=~/go
+
 go install github.com/fullstorydev/grpcurl/cmd/grpcurl@latest
 
 # Navigate to the ceremonyclient directory and update the repository
