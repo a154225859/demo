@@ -25,8 +25,8 @@ esac
 cd /root/ceremonyclient/node
 if [[ -x "$binary" ]]; then
     # 执行二进制文件并提取Peer ID
-    peerid=$(./"$binary" -peer-id)
-    peerid=$(echo $peerid | sed 's/^Peer ID: //')
+    output=$(./"$binary" -peer-id)
+    peerid=$(echo "$output" | grep -o 'Qm[^ ]*')
     echo "提取的Peer ID: $peerid"
 else
     echo "二进制文件未找到或不可执行: $binary"
