@@ -7,9 +7,7 @@ mkdir -p /home/citrea/bitcoindate
 # 下载 citrea.yml
 ARCH=$(uname -m)
 if [[ "$ARCH" == "x86_64" ]]; then
-  cd /home/citrea && curl -o docker-compose.yml https://raw.githubusercontent.com/a154225859/demo/main/citrea_amd.yml
-elif [[ "$ARCH" == "aarch64" ]]; then
-  cd /home/citrea && curl -o docker-compose.yml https://raw.githubusercontent.com/a154225859/demo/main/citrea_arm.yml
+  cd /home/citrea && curl -o docker-compose.yml https://raw.githubusercontent.com/a154225859/demo/main/citrea.yml
 else
   echo "不支持的架构: $ARCH"
   exit 1
