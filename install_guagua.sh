@@ -178,10 +178,10 @@ install_quilibrium() {
 
     case "$choice" in
         y|Y)
-            cd /root && wget -O install.sh https://raw.githubusercontent.com/a154225859/demo/main/install.sh && chmod +x install.sh && bash install.sh
+            cd /root && wget -O install_quilibrium.sh https://raw.githubusercontent.com/a154225859/demo/main/install_quilibrium.sh && chmod +x install_quilibrium.sh && bash install_quilibrium.sh
             ;;
         n|N)
-            cd /root && wget -O install.sh https://raw.githubusercontent.com/a154225859/demo/main/installx.sh && chmod +x install.sh && bash install.sh
+            cd /root && wget -O install_quilibrium.sh https://raw.githubusercontent.com/a154225859/demo/main/installx_quilibrium.sh && chmod +x install_quilibrium.sh && bash install_quilibrium.sh
             ;;
         *)
             echo "输入无效, y or n."
@@ -193,10 +193,10 @@ update_quilibrium() {
 
     case "$choice" in
         y|Y)
-            cd /root && wget -O update.sh https://raw.githubusercontent.com/a154225859/demo/main/update.sh && chmod +x update.sh && bash update.sh
+            cd /root && wget -O update_quilibrium.sh https://raw.githubusercontent.com/a154225859/demo/main/update_quilibrium.sh && chmod +x update_quilibrium.sh && bash update_quilibrium.sh
             ;;
         n|N)
-            cd /root && wget -O update.sh https://raw.githubusercontent.com/a154225859/demo/main/updatex.sh && chmod +x update.sh && bash update.sh
+            cd /root && wget -O update_quilibrium.sh https://raw.githubusercontent.com/a154225859/demo/main/updatex_quilibrium.sh && chmod +x update_quilibrium.sh && bash update_quilibrium.sh
             ;;
         *)
             echo "输入无效, y or n."
