@@ -4,12 +4,27 @@
 sudo apt-get update
 
 # 安装必要的依赖包
-sudo apt-get install -y \
-    apt-transport-https \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release
+sudo apt-get install apt-transport-https git wget tar curl zip ca-certificates curl gnupg lsb-release screen -y
+
+if ! [ "$(sudo swapon -s)" ]; then
+  echo "创建swap..."
+  sudo mkdir /swap && sudo fallocate -l 24G /swap/swapfile && sudo chmod 600 /swap/swapfile || { echo "Failed to create swap space! Exiting..."; exit 1; }
+  sudo mkswap /swap/swapfile && sudo swapon /swap/swapfile || { echo "Failed to set up swap space! Exiting..."; exit 1; }
+  sudo bash -c 'echo "/swap/swapfile swap swap defaults 0 0" >> /etc/fstab' || { echo "Failed to update /etc/fstab! Exiting..."; exit 1; }
+fi
+
+echo "配置网络参数..."
+if [[ $(grep ^"net.core.rmem_max=600000000"$ /etc/sysctl.conf) ]]; then
+  echo "\net.core.rmem_max=600000000\" found inside /etc/sysctl.conf, skipping..."
+else
+  echo -e "\n# Change made to increase buffer sizes for better network performance for ceremonyclient\nnet.core.rmem_max=600000000" | sudo tee -a /etc/sysctl.conf > /dev/null
+fi
+if [[ $(grep ^"net.core.wmem_max=600000000"$ /etc/sysctl.conf) ]]; then
+  echo "\net.core.wmem_max=600000000\" found inside /etc/sysctl.conf, skipping..."
+else
+  echo -e "\n# Change made to increase buffer sizes for better network performance for ceremonyclient\nnet.core.wmem_max=600000000" | sudo tee -a /etc/sysctl.conf > /dev/null
+fi
+sudo sysctl -p
 
 # 添加 Docker 官方 GPG 密钥
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
