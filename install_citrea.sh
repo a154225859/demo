@@ -47,7 +47,6 @@ sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s http
 sudo chmod +x /usr/local/bin/docker-compose
 
 # 创建目录
-mkdir -p /home/citrea
 mkdir -p /home/citrea/fulldate
 mkdir -p /home/citrea/bitcoindate
 
