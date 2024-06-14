@@ -55,5 +55,5 @@ else
 fi
 sudo sysctl -p
 
-启动 Docker Compose 服务
+# 启动 Docker Compose 服务
 cd /home/citrea && sudo docker-compose up -d
