@@ -4,7 +4,7 @@ echo "Stop the existing ceremonyclient service"
 systemctl stop ceremonyclient.service
 
 # Navigate to the ceremonyclient directory and update the repository
-cd /root/ceremonyclient && git remote set-url origin https://source.quilibrium.com/quilibrium/ceremonyclient.git && git fetch origin && git checkout release-cdn && git pull
+cd /root/ceremonyclient && git checkout main && git branch -D release && git remote set-url origin https://github.com/quilibriumnetwork/ceremonyclient.git && git pull && git checkout release
 
 # Extract version from Go file
 version=$(cat /root/ceremonyclient/node/config/version.go | grep -A 1 "func GetVersion() \[\]byte {" | grep -Eo '0x[0-9a-fA-F]+' | xargs printf "%d.%d.%d")
