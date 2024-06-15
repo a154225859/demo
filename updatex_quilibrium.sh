@@ -31,8 +31,7 @@ for file in $files; do
 done
 
 binary="node-$version-$release_os-$release_arch"
-
-chmod +x binary
+chmod +x node-$version-$release_os-$release_arch
 
 echo "Create/update the systemd service file for ceremonyclient"
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
