@@ -6,26 +6,32 @@ systemctl stop ceremonyclient.service
 # Navigate to the ceremonyclient directory and update the repository
 cd /root/ceremonyclient && git checkout main && git branch -D release && git remote set-url origin https://github.com/quilibriumnetwork/ceremonyclient.git && git pull && git checkout release
 
-# Extract version from Go file
-version=$(cat /root/ceremonyclient/node/config/version.go | grep -A 1 "func GetVersion() \[\]byte {" | grep -Eo '0x[0-9a-fA-F]+' | xargs printf "%d.%d.%d")
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    release_os="linux"
+    if [[ $(uname -m) == "aarch64"* ]]; then
+        release_arch="arm64"
+    else
+        release_arch="amd64"
+    fi
+else
+    release_os="darwin"
+    release_arch="arm64"
+fi
 
-# Determine binary path based on OS type and architecture
-case "$OSTYPE" in
-    linux-gnu*)
-        if [[ $(uname -m) == x86* ]]; then
-            binary="node-$version-linux-amd64"
-        else
-            binary="node-$version-linux-arm64"
-        fi
-        ;;
-    darwin*)
-        binary="node-$version-darwin-arm64"
-        ;;
-    *)
-        echo "unsupported OS for releases, please build from source"
-        exit 1
-        ;;
-esac
+files=$(curl https://releases.quilibrium.com/release | grep $release_os-$release_arch)
+new_release=false
+
+for file in $files; do
+    version=$(echo "$file" | cut -d '-' -f 2)
+    if ! test -f "./$file"; then
+        curl "https://releases.quilibrium.com/$file" > "$file"
+        new_release=true
+    fi
+done
+
+binary="node-$version-$release_os-$release_arch"
+
+chmod +x binary
 
 echo "Create/update the systemd service file for ceremonyclient"
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
