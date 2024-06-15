@@ -30,8 +30,8 @@ for file in $files; do
     fi
 done
 
-binary=node-$version-$release_os-$release_arch
-chmod +x binary
+binary="node-$version-$release_os-$release_arch"
+chmod +x node-$version-$release_os-$release_arch
 
 # 获取 CPU 核心数量并计算 CPUQuota
 CPU_CORES=$(nproc)
