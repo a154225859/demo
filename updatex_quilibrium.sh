@@ -24,6 +24,7 @@ new_release=false
 
 for file in $files; do
     version=$(echo "$file" | cut -d '-' -f 2)
+    echo "version === $version"
     if ! test -f "./$file"; then
         curl "https://releases.quilibrium.com/$file" > "$file"
         new_release=true
@@ -33,6 +34,7 @@ done
 binary="node-$version-$release_os-$release_arch"
 chmod +x node-$version-$release_os-$release_arch
 
+echo "binary ===$binary"
 echo "Create/update the systemd service file for ceremonyclient"
 cat <<EOF > /lib/systemd/system/ceremonyclient.service
 [Unit]
