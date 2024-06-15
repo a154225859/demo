@@ -218,7 +218,7 @@ open_quilibrium_grpc() {
 	sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: /ip4/0.0.0.0/tcp/8338|g' /root/ceremonyclient/node/.config/config.yml
 }
 check_rewards() {
-	exec_start=$(sed -n 's/^ExecStart=\/root\/ceremonyclient\/node\///p' /lib/systemd/system/ceremonyclient.service) && ./$exec_start --node-info
+	exec_start=$(sed -n 's/^ExecStart=\/root\/ceremonyclient\/node\///p' /lib/systemd/system/ceremonyclient.service) && cd /root/ceremonyclient/node && ./$exec_start --node-info
 }
 
 
