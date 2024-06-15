@@ -218,40 +218,7 @@ open_quilibrium_grpc() {
 	sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: /ip4/0.0.0.0/tcp/8338|g' /root/ceremonyclient/node/.config/config.yml
 }
 check_rewards() {
-	# 提取版本号
-	version=$(cat /root/ceremonyclient/node/config/version.go | grep -A 1 "func GetVersion() \[\]byte {" | grep -Eo '0x[0-9a-fA-F]+' | xargs printf "%d.%d.%d")
-	
-	# 确定二进制文件路径
-	case "$OSTYPE" in
-		linux-gnu*)
-			if [[ $(uname -m) == x86* ]]; then
-				binary="node-$version-linux-amd64"
-			else
-				binary="node-$version-linux-arm64"
-			fi
-			;;
-		darwin*)
-			binary="node-$version-darwin-arm64"
-			;;
-		*)
-			echo "unsupported OS for releases, please build from source"
-			exit 1
-			;;
-	esac
-	
-	binary_path="/root/ceremonyclient/node/$binary"
-	
-	# 检查二进制文件是否存在
-	if [[ ! -f "$binary_path" ]]; then
-		echo "Binary file $binary_path not found. Please download or build it."
-		exit 1
-	fi
-	
-	# 确保二进制文件可执行
-	chmod +x "$binary_path"
-	
-	# 执行二进制文件并增加--node-info参数
-	"$binary_path" --node-info
+	exec_start=$(sed -n 's/^ExecStart=\/root\/ceremonyclient\/node\///p' /lib/systemd/system/ceremonyclient.service) && ./$exec_start --node-info
 }
 
 
