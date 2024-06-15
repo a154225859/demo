@@ -18,6 +18,7 @@ else
     release_arch="arm64"
 fi
 
+cd /root/ceremonyclient/node
 files=$(curl https://releases.quilibrium.com/release | grep $release_os-$release_arch)
 new_release=false
 
