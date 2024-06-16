@@ -241,7 +241,7 @@ backup_store() {
 	
 	# 删除现有的 peerid.zip 文件（如果存在）
 	rm *.zip
-  rm store.tar.gz
+  	rm store.tar.gz
 	
 	# 压缩 .config 目录中的所有文件到 peerid.zip
 	zip -r "${peerid}.zip" *
