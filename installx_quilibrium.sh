@@ -45,9 +45,9 @@ else
   # 检查系统架构
   ARCH=$(uname -m)
   if [[ "$ARCH" == "x86_64" ]]; then
-    GO_URL="http://49.13.194.189:8008/go1.20.14.linux-amd64.tar.gz"
+    GO_URL="https://go.dev/dl/go1.20.14.linux-amd64.tar.gz"
   elif [[ "$ARCH" == "aarch64" ]]; then
-    GO_URL="http://49.13.194.189:8008/go1.20.14.linux-arm64.tar.gz"
+    GO_URL="https://go.dev/dl/go1.20.14.linux-arm64.tar.gz"
   else
     echo "不支持的架构: $ARCH"
     exit 1
