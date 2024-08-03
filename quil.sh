@@ -1,7 +1,6 @@
 #!/bin/bash
 
 install_quilibrium() {
-	echo "还跑Quilibrium,不要命啦"
 	read -p "是否限制CPU? (y/n): " choice
 
     case "$choice" in
