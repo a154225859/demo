@@ -44,7 +44,6 @@ stop_quilibrium() {
 }
 
 open_quilibrium_grpc() {
-	sed -i 's|listenMultiaddr: /ip4/0.0.0.0/udp/8336/quic|listenMultiaddr: /ip4/0.0.0.0/tcp/8336|g' /root/ceremonyclient/node/.config/config.yml
 	sed -i 's|listenGrpcMultiaddr: ""|listenGrpcMultiaddr: /ip4/0.0.0.0/tcp/8337|g' /root/ceremonyclient/node/.config/config.yml
 	sed -i 's|listenRESTMultiaddr: ""|listenRESTMultiaddr: /ip4/0.0.0.0/tcp/8338|g' /root/ceremonyclient/node/.config/config.yml
 }
