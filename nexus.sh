@@ -138,3 +138,5 @@ else
 fi
 
 show_status "Nexus Prover 安装和服务设置完成！" "success"
+
+journalctl -u nexus.service -f -n 100
