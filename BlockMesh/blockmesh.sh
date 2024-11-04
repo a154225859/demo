@@ -26,7 +26,7 @@ while true; do
     case $choice in
         1)
             # 安装 BlockMesh
-            execute_script "https://github.com/a154225859/demo/blob/main/install_blockmesh.sh"
+            execute_script "https://raw.githubusercontent.com/a154225859/demo/refs/heads/main/BlockMesh/install_blockmesh.sh"
             ;;
         2)
             # 更新 BlockMesh
