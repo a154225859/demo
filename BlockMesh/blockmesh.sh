@@ -14,8 +14,7 @@ show_menu() {
 # 执行脚本的函数
 execute_script() {
     local script_url=$1
-    echo "执行脚本：$script_url"
-    curl -fsSL "$script_url" | bash
+    wget -O script.sh "$script_url" && chmod +x script.sh && bash script.sh
 }
 
 # 主循环
