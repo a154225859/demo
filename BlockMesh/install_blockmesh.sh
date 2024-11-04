@@ -38,15 +38,12 @@ if [[ ! -f target/release/blockmesh-cli ]]; then
     exit 1
 fi
 
-# 提示用户输入邮箱
-echo "请输入您的邮箱:"
-read email
+# 提示输入邮箱和密码
+read -p "请输入您的 BlockMesh 邮箱: " email
+read -s -p "请输入您的 BlockMesh 密码: " password
+echo
 
-# 提示用户输入密码（隐藏输入）
-echo "请输入您的密码:"
-read password
-
-# 使用 BlockMesh CLI 创建后台运行的 Docker 容器，并传递用户输入的邮箱和密码
+# 使用 BlockMesh CLI 创建后台运行的 Docker 容器
 echo "为 BlockMesh CLI 创建 Docker 容器并后台运行..."
 docker run -d \
     --name blockmesh-cli-container \
