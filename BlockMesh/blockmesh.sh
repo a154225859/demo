@@ -29,7 +29,7 @@ while true; do
             ;;
         2)
             # 更新 BlockMesh
-            echo "没写"
+            echo "还没写"
             #execute_script "https://github.com/a154225859/demo/blob/main/update_blockmesh.sh"
             ;;
         3)
