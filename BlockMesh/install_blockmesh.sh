@@ -43,7 +43,7 @@ read -p "请输入您的 BlockMesh 邮箱: " email
 read -s -p "请输入您的 BlockMesh 密码: " password
 echo
 
-# 使用 BlockMesh CLI 创建后台运行的 Docker 容器
+# 使用 BlockMesh CLI 创建后台运行的 Docker 容器，并传递用户输入的邮箱和密码
 echo "为 BlockMesh CLI 创建 Docker 容器并后台运行..."
 docker run -d \
     --name blockmesh-cli-container \
