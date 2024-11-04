@@ -34,18 +34,15 @@ while true; do
             ;;
         3)
             # 启动 BlockMesh
-            echo "没写"
-            #execute_script "https://github.com/a154225859/demo/blob/main/start_blockmesh.sh"
+            execute_script "https://raw.githubusercontent.com/a154225859/demo/refs/heads/main/BlockMesh/start_blockmesh.sh"
             ;;
         4)
             # 停止 BlockMesh
-            echo "没写"
-            #execute_script "https://github.com/a154225859/demo/blob/main/stop_blockmesh.sh"
+            docker stop blockmesh-cli-container
             ;;
         5)
             # 查看日志
-            echo "没写"
-            #execute_script "https://github.com/a154225859/demo/blob/main/log_blockmesh.sh"
+            docker logs -f blockmesh-cli-container
             ;;
         6)
             # 退出
