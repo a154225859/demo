@@ -76,7 +76,7 @@ fi
 # 安装依赖项
 cd $HOME/network-api/clients/cli
 show_status "安装所需的依赖项..." "progress"
-if ! sudo apt install cargo pkg-config libssl-dev -y; then
+if ! sudo apt install protobuf-compiler build-essential pkg-config libssl-dev git-all -y; then
     show_status "安装依赖项失败。" "error"
     exit 1
 fi
