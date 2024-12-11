@@ -7,6 +7,9 @@ GREEN='\033[1;32m'
 YELLOW='\033[1;33m'
 RED='\033[1;31m'
 PINK='\033[1;35m'
+PROVER_ID=""
+FILE="/root/.nexus/prover-id"
+SERVICE_FILE="/etc/systemd/system/nexus.service"
 
 # 自定义状态显示函数
 show_status() {
@@ -28,9 +31,29 @@ show_status() {
     esac
 }
 
-# 定义服务名称和文件路径
-SERVICE_NAME="nexus"
-SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME.service"
+# 使用循环解析参数
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --prover-id)
+      PROVER_ID="$2"
+      shift # 跳过选项
+      shift # 跳过选项值
+      ;;
+    *)
+      exit 1
+      ;;
+  esac
+done
+
+# 如果提供了 PROVER_ID，先导入 ID
+if [ -n "$PROVER_ID" ]; then
+  # 创建目录（如果不存在）
+  mkdir -p "$(dirname "$FILE")"
+  # 写入内容
+  echo "$PROVER_ID" > "$FILE"
+  
+  echo "已导入id: $PROVER_ID"
+fi
 
 # 安装 Rust
 show_status "正在安装 Rust..." "progress"
@@ -40,7 +63,7 @@ if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; th
 fi
 
 # 加载 Rust 环境
-source $HOME/.cargo/env
+source /root/.cargo/env
 
 # 更新软件包列表
 show_status "更新软件包列表..." "progress"
@@ -61,20 +84,20 @@ else
 fi
 
 # 删除已有的仓库（如果存在）
-if [ -d "$HOME/network-api" ]; then
+if [ -d "/root/network-api" ]; then
     show_status "正在删除现有的仓库..." "progress"
-    rm -rf "$HOME/network-api"
+    rm -rf "/root/network-api"
 fi
 
 # 克隆 Nexus-XYZ 网络 API 仓库
 show_status "正在克隆 Nexus-XYZ 网络 API 仓库..." "progress"
-if ! git clone https://github.com/nexus-xyz/network-api.git "$HOME/network-api"; then
+if ! git clone https://github.com/nexus-xyz/network-api.git "/root/network-api"; then
     show_status "克隆仓库失败。" "error"
     exit 1
 fi
 
 # 安装依赖项
-cd $HOME/network-api/clients/cli
+cd /root/network-api/clients/cli
 show_status "安装所需的依赖项..." "progress"
 if ! sudo apt install protobuf-compiler build-essential pkg-config libssl-dev git-all -y; then
     show_status "安装依赖项失败。" "error"
@@ -99,9 +122,9 @@ After=network.target
 
 [Service]
 User=$USER
-WorkingDirectory=$HOME/network-api/clients/cli
+WorkingDirectory=/root/network-api/clients/cli
 Environment=NONINTERACTIVE=1
-ExecStart=$HOME/.cargo/bin/cargo run --release --bin prover -- beta.orchestrator.nexus.xyz
+ExecStart=/root/.cargo/bin/cargo run --release --bin prover -- beta.orchestrator.nexus.xyz
 Restart=always
 RestartSec=10
 
@@ -119,19 +142,19 @@ if ! sudo systemctl daemon-reload; then
     exit 1
 fi
 
-if ! sudo systemctl start $SERVICE_NAME.service; then
+if ! sudo systemctl start nexus.service; then
     show_status "启动服务失败。" "error"
     exit 1
 fi
 
-if ! sudo systemctl enable $SERVICE_NAME.service; then
+if ! sudo systemctl enable nexus.service; then
     show_status "启用服务失败。" "error"
     exit 1
 fi
 
 # 改进的服务状态检查逻辑
 show_status "服务状态：" "progress"
-if sudo systemctl is-active --quiet $SERVICE_NAME.service; then
+if sudo systemctl is-active --quiet nexus.service; then
     show_status "服务正在运行。" "success"
 else
     show_status "获取服务状态失败。" "error"
