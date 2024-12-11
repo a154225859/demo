@@ -121,12 +121,11 @@ Description=Nexus XYZ Prover Service
 After=network.target
 
 [Service]
-User=$USER
 WorkingDirectory=/root/network-api/clients/cli
 Environment=NONINTERACTIVE=1
 ExecStart=/root/.cargo/bin/cargo run --release --bin prover -- beta.orchestrator.nexus.xyz
 Restart=always
-RestartSec=10
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
