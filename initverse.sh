@@ -1,21 +1,29 @@
 #!/bin/bash
 
-# 检查是否传入了钱包地址和工作者名称
-if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "错误: 请提供钱包地址和工作者名称。"
-  echo "用法: ./initverse.sh <YOUR_WALLET_ADDRESS> <WORKER_NAME>"
+# 检查是否以 root 身份运行
+if [ "$(id -u)" -ne 0 ]; then
+  echo "错误: 请以 root 身份运行此脚本。"
+  exit 1
+fi
+
+# 检查是否传入了钱包地址
+if [ -z "$1" ]; then
+  echo "错误: 请提供钱包地址。"
+  echo "用法: ./initverse.sh <YOUR_WALLET_ADDRESS>"
   exit 1
 fi
 
 WALLET_ADDRESS=$1
-WORKER_NAME=$2
+
+# 生成随机的5个字母加2位数字作为 WORKER_NAME
+WORKER_NAME=$(cat /dev/urandom | tr -dc 'a-zA-Z' | fold -w 5 | head -n 1)$(shuf -i 10-99 -n 1)
 
 # 设置工作目录为 /root/iniminer
 WORKING_DIR="/root/iniminer"
 
 # 切换到指定的工作目录
 echo "切换到工作目录 $WORKING_DIR ..."
-mkdir $WORKING_DIR
+mkdir -p $WORKING_DIR
 cd $WORKING_DIR || { echo "错误: 无法切换到目录 $WORKING_DIR"; exit 1; }
 
 # 下载 Iniminer
