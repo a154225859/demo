@@ -56,4 +56,4 @@ echo "正在启动 docker-compose..."
 docker-compose up -d
 
 echo "脚本执行完成。"
-dockerc ps
+docker ps
