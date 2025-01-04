@@ -19,6 +19,8 @@ if ! command -v docker &> /dev/null; then
 		
 		# 应用可执行权限
 		sudo chmod +x /usr/local/bin/docker-compose
+        	sudo usermod -aG docker $USER
+	 	newgrp docker
         echo "Docker installation complete."
     else
         echo "Docker is already installed. "
