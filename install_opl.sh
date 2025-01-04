@@ -38,7 +38,7 @@ fi
 # 存储 JSON 参数
 json_param="$1"
 
-echo "收到的 JSON 参数：$json_param"
+echo "keystore：$json_param"
 
 # 克隆 opl 仓库
 echo "正在从 GitHub 克隆 opl 仓库..."
@@ -48,14 +48,12 @@ mkdir -p ./opl/keystore
 
 echo "$json_param" > ./opl/keystore/keystore.json
 
-# 进入 opl 目录
 cd opl
 
-# 以 detached 模式启动 docker-compose
 echo "正在启动 docker-compose..."
 docker-compose up -d
 
-echo "脚本执行完成。"
+echo "安装完成。"
 docker ps
 
 # 启动INI
