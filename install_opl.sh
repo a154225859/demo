@@ -40,13 +40,13 @@ fi
 echo "正在从 GitHub 克隆 opl 仓库..."
 git clone https://github.com/a154225859/opl.git
 
-# 创建 keystore 目录
-echo "创建 keystore 目录..."
-mkdir -p /opl/keystore
+# 创建 ./opl/keystore 目录
+echo "创建 ./opl/keystore 目录..."
+mkdir -p ./opl/keystore
 
-# 将 JSON 参数写入到 /opl/keystore/keystore.json 文件
-echo "正在将 JSON 参数写入到 /opl/keystore/keystore.json..."
-echo "$json_param" > /opl/keystore/keystore.json
+# 将 JSON 参数写入到 ./opl/keystore/keystore.json 文件
+echo "正在将 JSON 参数写入到 ./opl/keystore/keystore.json..."
+echo "$json_param" > ./opl/keystore/keystore.json
 
 # 进入 opl 目录
 cd opl
