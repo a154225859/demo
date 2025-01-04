@@ -1,42 +1,57 @@
 #!/bin/bash
+
+# 检查并安装 Docker 和 Docker Compose
+if ! command -v docker &> /dev/null; then
+    echo "Docker 未找到，正在安装 Docker..."
+    # 添加 Docker 官方 GPG 密钥
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+    # 设置 Docker 稳定版的 APT 源
+    echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+    # 更新包索引
+    sudo apt-get update
+
+    # 安装必要的依赖包和 Docker
+    sudo apt-get install apt-transport-https ca-certificates gnupg lsb-release docker-ce docker-ce-cli containerd.io -y
+
+    # 安装 Docker Compose
+    sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K.*\d')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+    # 应用可执行权限
+    sudo chmod +x /usr/local/bin/docker-compose
+    sudo usermod -aG docker $USER
+    newgrp docker
+    echo "Docker 和 Docker Compose 安装完成。"
+else
+    echo "Docker 已经安装。"
+fi
+
 # 检查是否提供了参数
 if [ -z "$1" ]; then
-  echo "错误：没有提供参数，请提供 JSON 参数。"
-  exit 1
+    echo "错误：没有提供参数，请提供 JSON 参数。"
+    exit 1
 fi
 
 # 存储 JSON 参数
 json_param="$1"
+
 # 打印收到的 JSON 参数
 echo "收到的 JSON 参数：$json_param"
 
-if ! command -v docker &> /dev/null; then
-        echo "Docker not found. Installing Docker..."
-		# 添加 Docker 官方 GPG 密钥
-		curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-		
-		# 设置 Docker 稳定版的 APT 源
-		echo \
-		"deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-		$(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-		
-		# 更新包索引
-		sudo apt-get update
-		
-		# 安装必要的依赖包
-		sudo apt-get install apt-transport-https ca-certificates gnupg lsb-release docker-ce docker-ce-cli containerd.io -y
-		
-		# 安装 Docker Compose
-		sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K.*\d')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-		
-		# 应用可执行权限
-		sudo chmod +x /usr/local/bin/docker-compose
-        	sudo usermod -aG docker $USER
-	 	newgrp docker
-        echo "Docker installation complete."
-    else
-        echo "Docker is already installed. "
-    fi
+# 更新 apt 仓库
+echo "正在更新 apt 仓库..."
+sudo apt update -y
+
+# 下载 Openledger 节点压缩包
+echo "正在下载 Openledger 节点压缩包..."
+wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
+
+# 解压下载的压缩包
+echo "正在解压 Openledger 节点压缩包..."
+unzip openledger-node-1.0.0-linux.zip -d openledger-node
 
 # 克隆 opl 仓库
 echo "正在从 GitHub 克隆 opl 仓库..."
@@ -56,3 +71,5 @@ cd opl
 # 以 detached 模式启动 docker-compose
 echo "正在启动 docker-compose..."
 docker-compose up -d
+
+echo "脚本执行完成。"
