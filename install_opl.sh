@@ -1,4 +1,6 @@
 #!/bin/bash
+# 停止INI
+sudo systemctl stop iniminer.service
 
 # 检查并安装 Docker 和 Docker Compose
 if ! command -v docker &> /dev/null; then
@@ -22,8 +24,6 @@ if ! command -v docker &> /dev/null; then
 
     # 应用可执行权限
     sudo chmod +x /usr/local/bin/docker-compose
-    sudo usermod -aG docker $USER
-    newgrp docker
     echo "Docker 和 Docker Compose 安装完成。"
 else
     echo "Docker 已经安装。"
@@ -57,3 +57,6 @@ docker-compose up -d
 
 echo "脚本执行完成。"
 docker ps
+
+# 启动INI
+sudo systemctl start iniminer.service
