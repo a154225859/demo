@@ -38,31 +38,14 @@ fi
 # 存储 JSON 参数
 json_param="$1"
 
-# 打印收到的 JSON 参数
 echo "收到的 JSON 参数：$json_param"
-
-# 更新 apt 仓库
-echo "正在更新 apt 仓库..."
-sudo apt update -y
-
-# 下载 Openledger 节点压缩包
-echo "正在下载 Openledger 节点压缩包..."
-wget https://cdn.openledger.xyz/openledger-node-1.0.0-linux.zip
-
-# 解压下载的压缩包
-echo "正在解压 Openledger 节点压缩包..."
-unzip openledger-node-1.0.0-linux.zip -d openledger-node
 
 # 克隆 opl 仓库
 echo "正在从 GitHub 克隆 opl 仓库..."
 git clone https://github.com/a154225859/opl.git
 
-# 创建 ./opl/keystore 目录
-echo "创建 ./opl/keystore 目录..."
 mkdir -p ./opl/keystore
 
-# 将 JSON 参数写入到 ./opl/keystore/keystore.json 文件
-echo "正在将 JSON 参数写入到 ./opl/keystore/keystore.json..."
 echo "$json_param" > ./opl/keystore/keystore.json
 
 # 进入 opl 目录
@@ -73,3 +56,4 @@ echo "正在启动 docker-compose..."
 docker-compose up -d
 
 echo "脚本执行完成。"
+dockerc ps
