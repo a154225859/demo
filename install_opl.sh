@@ -40,6 +40,10 @@ json_param="$1"
 
 echo "keystore：$json_param"
 
+# 删除 machine-id 文件并重新生成
+rm -f /etc/machine-id
+systemd-machine-id-setup
+
 # 克隆 opl 仓库
 echo "正在从 GitHub 克隆 opl 仓库..."
 git clone https://github.com/a154225859/opl.git
