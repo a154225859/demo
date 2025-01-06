@@ -1,3 +1,4 @@
+#!/bin/bash
 sudo systemctl stop iniminer.service
 
 docker stop opl_worker
