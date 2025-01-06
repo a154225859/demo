@@ -1,3 +1,5 @@
+sudo systemctl stop iniminer.service
+
 docker stop opl_worker
 docker stop opl_scraper
 
