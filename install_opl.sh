@@ -26,10 +26,6 @@ if [ -z "$1" ]; then
 fi
 
 json_param="$1"
-if ! echo "$json_param" | jq empty; then
-    echo "错误：提供的参数不是有效的 JSON 格式。"
-    exit 1
-fi
 
 # 删除并重新生成 machine-id
 rm -f /etc/machine-id
