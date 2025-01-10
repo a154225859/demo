@@ -1,64 +1,77 @@
 #!/bin/bash
-# 停止INI
-sudo systemctl stop iniminer.service
+
+# 停止 INI 服务
+systemctl stop iniminer.service
 
 # 检查并安装 Docker 和 Docker Compose
 if ! command -v docker &> /dev/null; then
     echo "Docker 未找到，正在安装 Docker..."
-    # 添加 Docker 官方 GPG 密钥
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    apt-get update
+    apt-get install apt-transport-https ca-certificates gnupg lsb-release docker-ce docker-ce-cli containerd.io -y
 
-    # 设置 Docker 稳定版的 APT 源
-    echo \
-    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    # 更新包索引
-    sudo apt-get update
-
-    # 安装必要的依赖包和 Docker
-    sudo apt-get install apt-transport-https ca-certificates gnupg lsb-release docker-ce docker-ce-cli containerd.io -y
-
-    # 安装 Docker Compose
-    sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep -Po '"tag_name": "\K.*\d')/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-
-    # 应用可执行权限
-    sudo chmod +x /usr/local/bin/docker-compose
+    ARCH=$(uname -m)
+    curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$ARCH" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
     echo "Docker 和 Docker Compose 安装完成。"
 else
     echo "Docker 已经安装。"
 fi
 
-# 检查是否提供了参数
+# 检查参数
 if [ -z "$1" ]; then
     echo "错误：没有提供参数，请提供 JSON 参数。"
     exit 1
 fi
 
-# 存储 JSON 参数
 json_param="$1"
+if ! echo "$json_param" | jq empty; then
+    echo "错误：提供的参数不是有效的 JSON 格式。"
+    exit 1
+fi
 
-echo "keystore：$json_param"
-
-# 删除 machine-id 文件并重新生成
+# 删除并重新生成 machine-id
 rm -f /etc/machine-id
 systemd-machine-id-setup
 
-# 克隆 opl 仓库
+# 克隆仓库
 echo "正在从 GitHub 克隆 opl 仓库..."
-git clone https://github.com/a154225859/opl.git
+rm -rf opl
+git clone https://github.com/a154225859/opl.git || { echo "克隆仓库失败！"; exit 1; }
 
-mkdir -p ./opl/keystore
+# 写入 keystore
+mkdir -p /root/opl/keystore
+echo "$json_param" > /root/opl/keystore/keystore.json
 
-echo "$json_param" > ./opl/keystore/keystore.json
+# 创建 Systemd 服务文件
+SERVICE_FILE="/etc/systemd/system/opl-docker.service"
 
-cd opl
+bash -c "cat > $SERVICE_FILE" <<EOF
+[Unit]
+Description=Docker Compose Service for OPL
+Requires=docker.service
+After=docker.service
 
-echo "正在启动 docker-compose..."
-docker-compose up -d
+[Service]
+WorkingDirectory=/root/opl
+ExecStart=/usr/local/bin/docker-compose up -d
+ExecStop=/usr/local/bin/docker-compose down
+Restart=always
+TimeoutStartSec=0
 
-echo "安装完成。"
-docker ps
+[Install]
+WantedBy=multi-user.target
+EOF
 
-# 启动INI
-sudo systemctl start iniminer.service
+echo "Systemd 服务文件已创建：$SERVICE_FILE"
+
+# 启用并启动服务
+systemctl daemon-reload
+systemctl enable opl-docker.service
+systemctl start opl-docker.service
+
+# 启动 INI 服务
+systemctl start iniminer.service
+
+echo "安装完成，Docker Compose 已作为服务启动并设置为开机启动。"
