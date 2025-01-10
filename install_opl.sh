@@ -30,6 +30,12 @@ else
     echo "Docker 已经安装。"
 fi
 
+docker stop opl_worker
+docker stop opl_scraper
+
+docker rm opl_worker
+docker rm opl_scraper
+
 # 检查是否提供了参数
 if [ -z "$1" ]; then
     echo "错误：没有提供参数，请提供 JSON 参数。"
