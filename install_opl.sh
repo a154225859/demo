@@ -58,7 +58,7 @@ WorkingDirectory=/root/opl
 ExecStart=/usr/local/bin/docker-compose up -d
 ExecStop=/usr/local/bin/docker-compose down
 Restart=always
-TimeoutStartSec=0
+RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
