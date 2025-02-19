@@ -128,7 +128,7 @@ After=network.target
 [Service]
 WorkingDirectory=/root/network-api/clients/cli
 Environment=NONINTERACTIVE=1
-ExecStart=yes | /root/.cargo/bin/cargo run --release -- --start --beta
+ExecStart=/bin/bash -c 'yes | /root/.cargo/bin/cargo run --release -- --start --beta'
 Restart=always
 RestartSec=5s
 
