@@ -84,6 +84,8 @@ else
 fi
 
 # 删除已有的仓库（如果存在）
+sudo systemctl stop nexus.service
+
 if [ -d "/root/network-api" ]; then
     show_status "正在删除现有的仓库..." "progress"
     rm -rf "/root/network-api"
