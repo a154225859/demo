@@ -8,7 +8,7 @@ YELLOW='\033[1;33m'
 RED='\033[1;31m'
 PINK='\033[1;35m'
 PROVER_ID=""
-FILE="/root/.nexus/prover-id"
+FILE="/root/.nexus/node-id"
 SERVICE_FILE="/etc/systemd/system/nexus.service"
 
 # 自定义状态显示函数
@@ -96,6 +96,9 @@ if ! git clone https://github.com/nexus-xyz/network-api.git "/root/network-api";
     exit 1
 fi
 
+cd /root/network-api
+git -c advice.detachedHead=false checkout "$(git rev-list --tags --max-count=1)"
+
 # 安装依赖项
 cd /root/network-api/clients/cli
 show_status "安装所需的依赖项..." "progress"
@@ -123,7 +126,7 @@ After=network.target
 [Service]
 WorkingDirectory=/root/network-api/clients/cli
 Environment=NONINTERACTIVE=1
-ExecStart=/root/.cargo/bin/cargo run --release --bin prover -- beta.orchestrator.nexus.xyz
+ExecStart=/root/.cargo/bin/yes | cargo run --release -- --start --beta
 Restart=always
 RestartSec=5s
 
