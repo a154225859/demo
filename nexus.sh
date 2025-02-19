@@ -146,13 +146,13 @@ if ! sudo systemctl daemon-reload; then
     exit 1
 fi
 
-if ! sudo systemctl start nexus.service; then
-    show_status "启动服务失败。" "error"
+if ! sudo systemctl enable nexus.service; then
+    show_status "启用服务失败。" "error"
     exit 1
 fi
 
-if ! sudo systemctl enable nexus.service; then
-    show_status "启用服务失败。" "error"
+if ! sudo systemctl start nexus.service; then
+    show_status "启动服务失败。" "error"
     exit 1
 fi
 
