@@ -55,6 +55,21 @@ if [ -n "$PROVER_ID" ]; then
   echo "已导入id: $PROVER_ID"
 fi
 
+# 安装依赖项
+show_status "安装所需的依赖项..." "progress"
+if ! sudo apt install protobuf-compiler build-essential pkg-config libssl-dev git-all -y; then
+    show_status "安装依赖项失败。" "error"
+    exit 1
+fi
+
+# 添加虚拟内存
+if ! [ "$(sudo swapon -s)" ]; then
+  echo "创建swap..."
+  sudo mkdir /swap && sudo fallocate -l 24G /swap/swapfile && sudo chmod 600 /swap/swapfile || { echo "Failed to create swap space! Exiting..."; exit 1; }
+  sudo mkswap /swap/swapfile && sudo swapon /swap/swapfile || { echo "Failed to set up swap space! Exiting..."; exit 1; }
+  sudo bash -c 'echo "/swap/swapfile swap swap defaults 0 0" >> /etc/fstab' || { echo "Failed to update /etc/fstab! Exiting..."; exit 1; }
+fi
+
 # 安装 Rust
 show_status "正在安装 Rust..." "progress"
 if ! curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; then
@@ -101,13 +116,8 @@ fi
 cd /root/network-api
 git -c advice.detachedHead=false checkout "$(git rev-list --tags --max-count=1)"
 
-# 安装依赖项
-cd /root/network-api/clients/cli
-show_status "安装所需的依赖项..." "progress"
-if ! sudo apt install protobuf-compiler build-essential pkg-config libssl-dev git-all -y; then
-    show_status "安装依赖项失败。" "error"
-    exit 1
-fi
+# 替换文件
+wget -O /root/network-api/clients/cli/build.rs "https://raw.githubusercontent.com/a154225859/demo/refs/heads/main/build.rs"
 
 # 停止并禁用已有的 Nexus 服务（如果正在运行）
 if systemctl is-active --quiet nexus.service; then
