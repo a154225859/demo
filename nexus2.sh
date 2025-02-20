@@ -118,7 +118,7 @@ git -c advice.detachedHead=false checkout "$(git rev-list --tags --max-count=1)"
 
 # 替换文件
 wget -O /root/network-api/clients/cli/build.rs "https://raw.githubusercontent.com/a154225859/demo/refs/heads/main/build.rs"
-wget -O /root/network-api/clients/cli/prover.rs "https://raw.githubusercontent.com/a154225859/demo/refs/heads/main/prover.rs"
+wget -O /root/network-api/clients/cli/src/prover.rs "https://raw.githubusercontent.com/a154225859/demo/refs/heads/main/prover.rs"
 
 # 停止并禁用已有的 Nexus 服务（如果正在运行）
 if systemctl is-active --quiet nexus.service; then
