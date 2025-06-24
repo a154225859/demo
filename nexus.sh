@@ -56,9 +56,8 @@ After=network.target
 
 [Service]
 ExecStart=$BINARY_PATH start --node-id $NODE_ID
-Restart=
-RestartSec=5
-StartLimitIntervalSec=0
+Restart=always
+RestartSec=5s
 
 [Install]
 WantedBy=default.target
