@@ -82,12 +82,26 @@ echo -e "  ${YELLOW}show_logs NODE_ID${NC}  # 查看节点日志"
 # 函数定义，供手动调用：
 
 run_node() {
-  local NODE_ID=\$1
-  local NODE_NAME="nexus-node-\$NODE_ID"
-  local LOG_FILE="$NEXUS_LOG_DIR/node_\$NODE_ID.log"
-  echo -e "${GREEN}🚀 启动节点 \$NODE_NAME...${NC}"
-  docker run -d --name "\$NODE_NAME" -v "\$LOG_FILE":/app/logs/node.log "$NEXUS_IMAGE_NAME"
-  echo -e "${GREEN}📄 日志文件：\$LOG_FILE${NC}"
+  local NODE_ID="$1"
+  if [[ -z "$NODE_ID" ]]; then
+    echo "❌ 错误：需要传入节点 ID 作为参数，例如 run_node 1"
+    return 1
+  fi
+
+  # 过滤非法字符，保证容器名合法
+  local NODE_ID_CLEAN
+  NODE_ID_CLEAN=$(echo "$NODE_ID" | tr -cd 'a-zA-Z0-9_.-')
+  local NODE_NAME="nexus-node-$NODE_ID_CLEAN"
+  local LOG_FILE="$NEXUS_LOG_DIR/node_${NODE_ID_CLEAN}.log"
+
+  echo -e "${GREEN}🚀 启动节点 $NODE_NAME...${NC}"
+
+  docker run -d \
+    --name "$NODE_NAME" \
+    -v "$LOG_FILE":/app/logs/node.log \
+    "$NEXUS_IMAGE_NAME"
+
+  echo -e "${GREEN}📄 日志保存于: $LOG_FILE${NC}"
 }
 
 uninstall_node() {
