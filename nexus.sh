@@ -56,6 +56,7 @@ echo "🚀 启动 Nexus systemd 服务..."
 systemctl daemon-reexec
 systemctl daemon-reload
 systemctl enable nexus.service
+systemctl start nexus.service
 
 # -----------------------------------------------------------------------------
 # 6. 提示完成
