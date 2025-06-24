@@ -15,10 +15,8 @@ fi
 # -----------------------------------------------------------------------------
 # 2. 基本路径设置
 # -----------------------------------------------------------------------------
-NEXUS_HOME="$HOME/.nexus"
-BIN_DIR="$NEXUS_HOME/bin"
+BIN_DIR="/root/nexus"
 BINARY_NAME="nexus-network-linux-x86_64"
-BINARY_PATH="$BIN_DIR/nexus-network"
 SERVICE_NAME="nexus.service"
 
 mkdir -p "$BIN_DIR"
@@ -32,8 +30,8 @@ LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/nexus-xyz/nexus-cli/re
   grep "$BINARY_NAME\"" |
   cut -d '"' -f 4)
 
-curl -L -f -o "$BINARY_PATH" "$LATEST_RELEASE_URL"
-chmod +x "$BINARY_PATH"
+curl -L -f -o "$BIN_DIR/nexus-network" "$LATEST_RELEASE_URL"
+chmod +x "$BIN_DIR/nexus-network"
 
 # -----------------------------------------------------------------------------
 # 4. 创建 systemd 用户服务
@@ -47,7 +45,7 @@ Description=Nexus Network Node
 After=network.target
 
 [Service]
-ExecStart=$BINARY_PATH start --node-id $NODE_ID
+ExecStart=$BIN_DIR start --node-id $NODE_ID
 Restart=always
 RestartSec=5s
 
