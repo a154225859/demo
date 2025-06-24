@@ -17,7 +17,6 @@ fi
 # -----------------------------------------------------------------------------
 BIN_DIR="/root/nexus"
 BINARY_NAME="nexus-network-linux-x86_64"
-SERVICE_NAME="nexus.service"
 
 mkdir -p "$BIN_DIR"
 
@@ -56,7 +55,7 @@ EOF
 echo "🚀 启动 Nexus systemd 服务..."
 systemctl daemon-reexec
 systemctl daemon-reload
-systemctl enable --now "$SERVICE_NAME"
+systemctl enable nexus.service
 
 # -----------------------------------------------------------------------------
 # 6. 提示完成
