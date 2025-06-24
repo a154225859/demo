@@ -36,16 +36,13 @@ chmod +x "$BIN_DIR/nexus-network"
 # -----------------------------------------------------------------------------
 # 4. 创建 systemd 用户服务
 # -----------------------------------------------------------------------------
-SERVICE_FILE="$HOME/.config/systemd/user/$SERVICE_NAME"
-mkdir -p "$(dirname "$SERVICE_FILE")"
-
-cat > "$SERVICE_FILE" <<EOF
+cat <<EOF > /lib/systemd/system/nexus.service
 [Unit]
 Description=Nexus Network Node
 After=network.target
 
 [Service]
-ExecStart=$BIN_DIR start --node-id $NODE_ID
+ExecStart=$BIN_DIR/nexus-network start --node-id $NODE_ID
 Restart=always
 RestartSec=5s
 
