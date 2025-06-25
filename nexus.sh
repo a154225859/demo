@@ -66,13 +66,13 @@ echo -e "${CYAN}🧹 开始清理旧任务与残留会话...${NC}"
 echo "==============================="
 
 # 4. Kill nohup nexus.sh
-echo -e "${YELLOW}🔍 查找并终止 nohup 启动的 nexus.sh ...${NC}"
-NOHUP_PIDS=$(ps aux | grep "[n]exus.sh" | awk '{print $2}')
+echo -e "${YELLOW}🔍 查找并终止 nexus_monitor.sh ...${NC}"
+NOHUP_PIDS=$(ps aux | grep "[n]exus_monitor.sh" | awk '{print $2}')
 if [ -n "$NOHUP_PIDS" ]; then
   echo -e "${RED}💀 终止 PID：$NOHUP_PIDS${NC}"
   kill $NOHUP_PIDS
 else
-  echo -e "${GREEN}✅ 未发现 nohup nexus.sh 任务。${NC}"
+  echo -e "${GREEN}✅ 未发现 nexus_monitor 任务。${NC}"
 fi
 
 # 5. Kill all screen sessions
