@@ -8,6 +8,13 @@ if [ -z "$NODE_ID" ]; then
   exit 1
 fi
 
+if ! [ "$(sudo swapon -s)" ]; then
+  echo "创建swap..."
+  sudo mkdir /swap && sudo fallocate -l 16G /swap/swapfile && sudo chmod 600 /swap/swapfile || { echo "Failed to create swap space! Exiting..."; exit 1; }
+  sudo mkswap /swap/swapfile && sudo swapon /swap/swapfile || { echo "Failed to set up swap space! Exiting..."; exit 1; }
+  sudo bash -c 'echo "/swap/swapfile swap swap defaults 0 0" >> /etc/fstab' || { echo "Failed to update /etc/fstab! Exiting..."; exit 1; }
+fi
+
 NEXUS_HOME="/root/.nexus"
 BIN_DIR="$NEXUS_HOME/bin"
 SCREEN_NAME="ns_${NODE_ID}"
