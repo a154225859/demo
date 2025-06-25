@@ -108,11 +108,28 @@ echo ""
 echo -e "${GREEN}🚀 正在监控并保持 screen 会话运行：${SCREEN_NAME}${NC}"
 echo "==========================================="
 
+# 写入代码到 nexus_monitor.shw
+cat > nexus_monitor.sh <<EOF
+#!/bin/bash
+
+YELLOW='$YELLOW'
+GREEN='$GREEN'
+NC='$NC'
+SCREEN_NAME='$SCREEN_NAME'
+START_CMD='$START_CMD'
+
 while true; do
-  if ! screen -list | grep -q "\.${SCREEN_NAME}"; then
-    echo -e "${YELLOW}⚠️ screen 会话 '$SCREEN_NAME' 不存在，重新启动中...${NC}"
-    screen -dmS "$SCREEN_NAME" bash -c "$START_CMD"
-    echo -e "${GREEN}✅ 会话 '$SCREEN_NAME' 已启动，命令：$START_CMD${NC}"
+  if ! screen -list | grep -q "\\.\${SCREEN_NAME}"; then
+    echo -e "\${YELLOW}⚠️ screen 会话 '\${SCREEN_NAME}' 不存在，重新启动中...${NC}"
+    screen -dmS "\${SCREEN_NAME}" bash -c "\${START_CMD}"
+    echo -e "\${GREEN}✅ 会话 '\${SCREEN_NAME}' 已启动，命令：\${START_CMD}${NC}"
   fi
   sleep 10
 done
+EOF
+
+# 赋予执行权限
+chmod +x nexus_monitor.sh
+
+# 执行脚本
+nohup ./nexus_monitor.sh > /var/log/nexus.log 2>&1 &
