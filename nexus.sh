@@ -109,31 +109,29 @@ if ! command -v screen >/dev/null 2>&1; then
   sudo apt update && sudo apt install screen -y
 fi
 
-start_node() {
-  for NODE_ID in "$@"; do
-    SCREEN_NAME="ns_${NODE_ID}"
+for NODE_ID in "$@"; do
+  SCREEN_NAME="ns_${NODE_ID}"
 
-    echo "👉 处理节点 $NODE_ID ..."
+  echo "👉 处理节点 $NODE_ID ..."
 
-    # 如果会话已存在，则先杀掉
-    if screen -list | grep -q "\.${SCREEN_NAME}"; then
-      echo "⚠️ 发现已有会话 '$SCREEN_NAME'，正在关闭..."
-      screen -S "$SCREEN_NAME" -X quit
-      sleep 1  # 给 screen 一点时间完全关闭
-    fi
+  # 如果会话已存在，则先杀掉
+  if screen -list | grep -q "\.${SCREEN_NAME}"; then
+    echo "⚠️ 发现已有会话 '$SCREEN_NAME'，正在关闭..."
+    screen -S "$SCREEN_NAME" -X quit
+    sleep 1  # 给 screen 一点时间完全关闭
+  fi
 
-    # 启动新的 screen 会话
-    echo "🚀 启动新的 screen 会话 '$SCREEN_NAME'..."
-    screen -dmS "$SCREEN_NAME" "$BIN_DIR/nexus-network" start --node-id "$NODE_ID"
+  # 启动新的 screen 会话
+  echo "🚀 启动新的 screen 会话 '$SCREEN_NAME'..."
+  screen -dmS "$SCREEN_NAME" "$BIN_DIR/nexus-network" start --node-id "$NODE_ID"
 
-    # 检查是否成功
-    if screen -list | grep -q "\.${SCREEN_NAME}"; then
-      echo "✅ '$SCREEN_NAME' 启动成功！你可以使用以下命令进入会话："
-      echo "    screen -r $SCREEN_NAME"
-    else
-      echo "❌ 启动 '$SCREEN_NAME' 失败，请检查 BINARY_PATH 和节点参数。"
-    fi
+  # 检查是否成功
+  if screen -list | grep -q "\.${SCREEN_NAME}"; then
+    echo "✅ '$SCREEN_NAME' 启动成功！你可以使用以下命令进入会话："
+    echo "    screen -r $SCREEN_NAME"
+  else
+    echo "❌ 启动 '$SCREEN_NAME' 失败，请检查 BINARY_PATH 和节点参数。"
+  fi
 
-    echo ""
-  done
-}
+  echo ""
+done
