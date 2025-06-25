@@ -2,26 +2,26 @@
 
 set -e
 
-NEXUS_HOME="/root/.nexus"
-BIN_DIR="$NEXUS_HOME/bin"
 NODE_ID="$1"
-SERVICE_NAME="nexus-node-${NODE_ID}.service"
-SCREEN_NAME="ns_${NODE_ID}"
-
-GREEN='\033[1;32m'
-ORANGE='\033[1;33m'
-RED='\033[1;31m'
-NC='\033[0m'  # No Color
-
 if [ -z "$NODE_ID" ]; then
-  echo -e "${RED}❌ 错误：请提供节点ID作为参数，例如：$0 6908057${NC}"
+  echo "❌ 请提供节点ID作为参数，例如：$0 6908057"
   exit 1
 fi
 
-# 确保目录存在
+NEXUS_HOME="/root/.nexus"
+BIN_DIR="$NEXUS_HOME/bin"
+SCREEN_NAME="ns_${NODE_ID}"
+START_CMD="$BIN_DIR/nexus-network start --node-id $NODE_ID"
+
+# ANSI colors
+GREEN='\033[1;32m'
+RED='\033[1;31m'
+NC='\033[0m'
+
+# 1. 确保目录存在
 mkdir -p "$BIN_DIR"
 
-# 判断平台和架构
+# 2. 判断平台架构
 case "$(uname -s)" in
     Linux*) PLATFORM="linux";;
     Darwin*) PLATFORM="macos";;
@@ -36,58 +36,35 @@ esac
 
 BINARY_NAME="nexus-network-${PLATFORM}-${ARCH}"
 
-# 获取下载链接
+# 3. 下载最新 Release
 LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/nexus-xyz/nexus-cli/releases/latest |
     grep "browser_download_url" |
     grep "$BINARY_NAME\"" |
     cut -d '"' -f 4)
 
 if [ -z "$LATEST_RELEASE_URL" ]; then
-  echo -e "${RED}❌ 找不到 $BINARY_NAME 对应的 Release${NC}"
+  echo -e "${RED}❌ 未找到对应二进制文件${NC}"
   exit 1
 fi
 
-echo "⬇️ 下载 Nexus 可执行文件..."
+echo "⬇️ 下载 Nexus 节点二进制..."
 curl -L -o "$BIN_DIR/nexus-network" "$LATEST_RELEASE_URL"
 chmod +x "$BIN_DIR/nexus-network"
 
-# 安装 screen
-if ! command -v screen >/dev/null 2>&1; then
+# 4. 安装 screen（如缺）
+if ! command -v screen &> /dev/null; then
   echo "📦 安装 screen..."
   apt update && apt install screen -y
 fi
 
-# 生成 systemd 服务文件
-SERVICE_FILE="/etc/systemd/system/$SERVICE_NAME"
+# 5. 启动并监控 screen 会话
+echo -e "${GREEN}🚀 启动并监控 screen 会话: $SCREEN_NAME${NC}"
 
-echo "🛠️ 生成 systemd 服务：$SERVICE_FILE"
-cat <<EOF > "$SERVICE_FILE"
-[Unit]
-Description=Nexus Node $NODE_ID Screen Wrapper
-After=network.target
-
-[Service]
-Type=simple
-ExecStartPre=/usr/bin/screen -S ${SCREEN_NAME} -X quit || true
-ExecStart=/usr/bin/screen -DmS ${SCREEN_NAME} ${BIN_DIR}/nexus-network start --node-id ${NODE_ID}
-ExecStop=/usr/bin/screen -S ${SCREEN_NAME} -X quit
-Restart=always
-RestartSec=5
-User=root
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# 重新加载 systemd 并启动服务
-echo "🔄 重新加载 systemd..."
-systemctl daemon-reload
-
-echo "🚀 启动并设置开机自启..."
-systemctl enable --now "$SERVICE_NAME"
-
-echo -e "${GREEN}✅ 节点 $NODE_ID 安装并运行成功！${NC}"
-echo "🎯 查看日志："
-echo "    screen -r $SCREEN_NAME"
-echo "📊 检查状态："
-echo "    systemctl status $SERVICE_NAME"
+while true; do
+  if ! screen -list | grep -q "\.${SCREEN_NAME}"; then
+    echo "⚠️ screen 会话 '$SCREEN_NAME' 不存在，正在重新启动..."
+    screen -dmS "$SCREEN_NAME" bash -c "$START_CMD"
+    echo "✅ 会话 '$SCREEN_NAME' 已重启，执行：$START_CMD"
+  fi
+  sleep 10
+done
