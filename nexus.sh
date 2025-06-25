@@ -57,7 +57,33 @@ if ! command -v screen &> /dev/null; then
   apt update && apt install screen -y
 fi
 
-# 5. 启动并监控 screen 会话
+echo "🔍 正在查找所有 screen 会话..."
+
+# 5.获取所有 screen 会话 ID（Detached 或 Attached）
+SCREEN_IDS=$(screen -ls | awk '/\t[0-9]+/{print $1}')
+
+if [ -z "$SCREEN_IDS" ]; then
+  echo "✅ 没有正在运行的 screen 会话。"
+else
+  echo "🧨 正在关闭以下 screen 会话："
+  echo "$SCREEN_IDS"
+  for id in $SCREEN_IDS; do
+    screen -S "$id" -X quit
+  done
+  echo "✅ 所有 screen 会话已尝试关闭。"
+fi
+
+# 6.清理残留 socket
+SOCKET_DIR="/run/screen/S-$(whoami)"
+if [ -d "$SOCKET_DIR" ]; then
+  echo "🧹 正在清理残留 socket 文件..."
+  rm -rf "$SOCKET_DIR"/*
+  echo "✅ socket 清理完成。"
+else
+  echo "🧼 无 socket 残留。"
+fi
+
+# 7. 启动并监控 screen 会话
 echo -e "${GREEN}🚀 启动并监控 screen 会话: $SCREEN_NAME${NC}"
 
 while true; do
