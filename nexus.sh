@@ -4,15 +4,21 @@ set -e
 
 NODE_ID="$1"
 if [ -z "$NODE_ID" ]; then
-  echo "❌ 请提供节点ID作为参数，例如：$0 6908057"
+  echo -e "\033[1;31m❌ 请提供节点ID作为参数，例如：$0 6908057\033[0m"
   exit 1
 fi
 
+# 创建 swap（如果未开启）
 if ! [ "$(sudo swapon -s)" ]; then
-  echo "创建swap..."
-  sudo mkdir /swap && sudo fallocate -l 16G /swap/swapfile && sudo chmod 600 /swap/swapfile || { echo "Failed to create swap space! Exiting..."; exit 1; }
-  sudo mkswap /swap/swapfile && sudo swapon /swap/swapfile || { echo "Failed to set up swap space! Exiting..."; exit 1; }
-  sudo bash -c 'echo "/swap/swapfile swap swap defaults 0 0" >> /etc/fstab' || { echo "Failed to update /etc/fstab! Exiting..."; exit 1; }
+  echo -e "\033[1;36m💾 创建swap空间...\033[0m"
+  sudo mkdir -p /swap
+  sudo fallocate -l 16G /swap/swapfile
+  sudo chmod 600 /swap/swapfile || { echo -e "\033[1;31m❌ 设置swap权限失败，退出...\033[0m"; exit 1; }
+  sudo mkswap /swap/swapfile
+  sudo swapon /swap/swapfile || { echo -e "\033[1;31m❌ 启用swap失败，退出...\033[0m"; exit 1; }
+  sudo bash -c 'echo "/swap/swapfile swap swap defaults 0 0" >> /etc/fstab' || { echo -e "\033[1;31m❌ 更新/etc/fstab失败，退出...\033[0m"; exit 1; }
+else
+  echo -e "\033[1;32m✅ swap已启用，无需创建\033[0m"
 fi
 
 NEXUS_HOME="/root/.nexus"
@@ -30,7 +36,56 @@ NC='\033[0m'
 echo -e "${CYAN}📁 初始化目录结构...${NC}"
 mkdir -p "$BIN_DIR"
 
-# 1. 判断平台架构
+# 安装 screen（如缺）
+if ! command -v screen &> /dev/null; then
+  echo -e "${YELLOW}📥 正在安装 screen...${NC}"
+  apt update && apt install -y screen
+else
+  echo -e "${GREEN}✅ screen 已安装${NC}"
+fi
+
+echo ""
+echo -e "${CYAN}🧹 开始清理旧任务与残留会话...${NC}"
+echo "==============================="
+
+# 终止 nexus_monitor.sh 进程
+echo -e "${YELLOW}🔍 查找并终止 nexus_monitor.sh 任务...${NC}"
+NOHUP_PIDS=$(ps aux | grep "[n]exus_monitor.sh" | awk '{print $2}')
+if [ -n "$NOHUP_PIDS" ]; then
+  echo -e "${RED}💀 终止 PID：$NOHUP_PIDS${NC}"
+  kill $NOHUP_PIDS
+else
+  echo -e "${GREEN}✅ 未发现 nexus_monitor.sh 任务。${NC}"
+fi
+
+# 关闭所有 screen 会话
+echo -e "${YELLOW}📺 查找并关闭所有 screen 会话...${NC}"
+SCREEN_IDS=$(screen -ls | awk '/\t[0-9]+/{print $1}')
+if [ -n "$SCREEN_IDS" ]; then
+  for id in $SCREEN_IDS; do
+    echo -e "⛔ 正在关闭 screen 会话：$id"
+    screen -S "$id" -X quit
+  done
+else
+  echo -e "${GREEN}✅ 当前无运行中的 screen 会话。${NC}"
+fi
+
+# 清理残留 socket 文件
+SOCKET_DIR="/run/screen/S-$(whoami)"
+if [ -d "$SOCKET_DIR" ]; then
+  echo -e "${YELLOW}🧹 清理残留 socket 文件...${NC}"
+  rm -rf "$SOCKET_DIR"/*
+  echo -e "${GREEN}✅ socket 清理完成。${NC}"
+else
+  echo -e "${GREEN}✅ 无 socket 残留。${NC}"
+fi
+
+# 清理日志文件
+echo -e "${YELLOW}🧽 清理日志文件（如存在）...${NC}"
+rm -f /var/log/nexus.log /var/log/nexus_monitor_*.log /var/log/nexus_monitor_*.err nexus.pid
+echo -e "${GREEN}✅ 日志清理完成。${NC}"
+
+# 检测系统架构
 echo -e "${CYAN}🧠 检测系统平台与架构...${NC}"
 case "$(uname -s)" in
     Linux*) PLATFORM="linux";;
@@ -46,7 +101,7 @@ esac
 
 BINARY_NAME="nexus-network-${PLATFORM}-${ARCH}"
 
-# 2. 下载 Release
+# 下载最新 Release
 echo -e "${CYAN}⬇️ 正在获取最新 Nexus 可执行文件...${NC}"
 LATEST_RELEASE_URL=$(curl -s https://api.github.com/repos/nexus-xyz/nexus-cli/releases/latest |
     grep "browser_download_url" |
@@ -62,60 +117,11 @@ echo -e "${CYAN}📦 下载并赋予执行权限...${NC}"
 curl -L -o "$BIN_DIR/nexus-network" "$LATEST_RELEASE_URL"
 chmod +x "$BIN_DIR/nexus-network"
 
-# 3. 安装 screen（如缺）
-if ! command -v screen &> /dev/null; then
-  echo -e "${YELLOW}📥 正在安装 screen...${NC}"
-  apt update && apt install screen -y
-fi
-
 echo ""
-echo -e "${CYAN}🧹 开始清理旧任务与残留会话...${NC}"
-echo "==============================="
-
-# 4. Kill nohup nexus.sh
-echo -e "${YELLOW}🔍 查找并终止 nexus_monitor.sh ...${NC}"
-NOHUP_PIDS=$(ps aux | grep "[n]exus_monitor.sh" | awk '{print $2}')
-if [ -n "$NOHUP_PIDS" ]; then
-  echo -e "${RED}💀 终止 PID：$NOHUP_PIDS${NC}"
-  kill $NOHUP_PIDS
-else
-  echo -e "${GREEN}✅ 未发现 nexus_monitor 任务。${NC}"
-fi
-
-# 5. Kill all screen sessions
-echo -e "${YELLOW}📺 查找并关闭所有 screen 会话...${NC}"
-SCREEN_IDS=$(screen -ls | awk '/\t[0-9]+/{print $1}')
-if [ -n "$SCREEN_IDS" ]; then
-  for id in $SCREEN_IDS; do
-    echo -e "⛔ 正在关闭 screen 会话：$id"
-    screen -S "$id" -X quit
-  done
-else
-  echo -e "${GREEN}✅ 当前无运行中的 screen 会话。${NC}"
-fi
-
-# 6. 清理 socket 文件
-SOCKET_DIR="/run/screen/S-$(whoami)"
-if [ -d "$SOCKET_DIR" ]; then
-  echo -e "${YELLOW}🧹 清理残留 socket 文件...${NC}"
-  rm -rf "$SOCKET_DIR"/*
-  echo -e "${GREEN}✅ socket 清理完成。${NC}"
-else
-  echo -e "${GREEN}✅ 无 socket 残留。${NC}"
-fi
-
-# 7. 清理日志文件
-echo -e "${YELLOW}🧽 清理日志文件（如存在）...${NC}"
-rm -f /var/log/nexus.log /var/log/nexus_monitor_*.log /var/log/nexus_monitor_*.err
-rm -f nexus.pid
-echo -e "${GREEN}✅ 日志清理完成。${NC}"
-
-# 8. 启动并监控 screen
-echo ""
-echo -e "${GREEN}🚀 正在监控并保持 screen 会话运行：${SCREEN_NAME}${NC}"
+echo -e "${GREEN}🚀 准备启动并监控 screen 会话：${SCREEN_NAME}${NC}"
 echo "==========================================="
 
-# 写入代码到 nexus_monitor.shw
+# 写入监控脚本 nexus_monitor.sh
 cat > nexus_monitor.sh <<EOF
 #!/bin/bash
 
@@ -135,8 +141,10 @@ while true; do
 done
 EOF
 
-# 赋予执行权限
 chmod +x nexus_monitor.sh
 
-# 执行脚本
+# 后台运行监控脚本，日志写入 /var/log/nexus.log
 nohup ./nexus_monitor.sh > /var/log/nexus.log 2>&1 &
+
+echo -e "${GREEN}🎉 启动成功！日志输出请查看 /var/log/nexus.log${NC}"
+echo -e "${CYAN}📖 查看运行中的 screen 会话： screen -r $SCREEN_NAME${NC}"
