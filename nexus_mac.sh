@@ -23,8 +23,8 @@ fi
 
 NEXUS_HOME="/root/.nexus"
 BIN_DIR="$NEXUS_HOME/bin"
-SCREEN_NAME="ns_${NODE_ID}"
-START_CMD="$BIN_DIR/nexus-network start --node-id $NODE_ID"
+BINARY_PATH="$BIN_DIR/nexus-network"
+START_CMD="$BIN_DIR/nexus-network start --node-id $NODE_ID --headless"
 
 # ANSI colors
 GREEN='\033[1;32m'
@@ -118,10 +118,24 @@ curl -L -o "$BIN_DIR/nexus-network" "$LATEST_RELEASE_URL"
 chmod +x "$BIN_DIR/nexus-network"
 
 echo ""
-echo -e "${GREEN}🚀 准备启动并监控 screen 会话：${SCREEN_NAME}${NC}"
 echo "==========================================="
 
+SERVICE_FILE="$HOME/.config/systemd/user/$SERVICE_NAME"
+mkdir -p "$(dirname "$SERVICE_FILE")"
+
+cat > "$SERVICE_FILE" <<EOF
+[Unit]
+Description=Nexus Network Node
+After=network.target
+
+[Service]
+ExecStart=$START_CMD
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=default.target
+EOF
 
 
-echo -e "${GREEN}🎉 启动成功！日志输出请查看 /var/log/nexus.log${NC}"
-echo -e "${CYAN}📖 查看运行中的 screen 会话： screen -r $SCREEN_NAME${NC}"
