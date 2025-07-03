@@ -43,6 +43,7 @@ else
 fi
 
 ### 3. 清理旧任务 ###
+systemctl stop nexus.service
 echo -e "${CYAN}🧹 清理 nexus_monitor 与旧 screen 会话...${NC}"
 pkill -f nexus_monitor.sh || true
 
