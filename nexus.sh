@@ -41,7 +41,7 @@ function install_node() {
   # 安装screen
   if ! command -v screen &> /dev/null; then
     echo -e "${YELLOW}📥 安装 screen...${NC}"
-    apt update && apt install -y screen
+    apt update && apt install -y screen jq
   else
     echo -e "${GREEN}✅ screen 已安装${NC}"
   fi
