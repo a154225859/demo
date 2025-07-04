@@ -132,6 +132,11 @@ function update_check() {
   if [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
     echo -e "${YELLOW}📢 检测到新版本 $LATEST_VERSION，开始自动更新...${NC}"
 
+    if systemctl is-active --quiet nexus.service; then
+      echo "🛑 停止 nexus.service..."
+      systemctl stop nexus.service
+    fi
+    
     # 平台架构检测
     case "$(uname -s)" in
       Linux*) PLATFORM="linux" ;;
@@ -149,7 +154,7 @@ function update_check() {
     curl -L -o "$BINARY_PATH" "$DOWNLOAD_URL"
     chmod +x "$BINARY_PATH"
     echo -e "${GREEN}✅ 更新完成，重启服务中...${NC}"
-    systemctl restart nexus.service
+    systemctl start nexus.service
   else
     echo -e "${GREEN}✅ 当前已是最新版本，无需更新${NC}"
   fi
